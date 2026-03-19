@@ -21,8 +21,12 @@
         .scout-card { background: white; border-radius: 1.5rem; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(0,63,135,0.05); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
         .dark .scout-card { background: #0f172a; border-color: rgba(255,255,255,0.05); }
         .scout-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1); border-color: var(--bsa-blue); }
-        .vol-card { background: white; border-radius: 2rem; border-left: 8px solid var(--bsa-red); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); transition: all 0.2s ease; }
-        .dark .vol-card { background: #1e293b; border-color: rgba(255,255,255,0.05); border-left-color: var(--bsa-red); }
+        .vol-card, .trivia-card { background: white; border-radius: 2rem; border-left: 8px solid var(--bsa-red); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); transition: all 0.2s ease; }
+        .trivia-card { border-left-color: #8b5cf6; cursor: pointer; }
+        .trivia-card:hover { transform: translateY(-4px); box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1); }
+        .dark .vol-card, .dark .trivia-card { background: #1e293b; border-color: rgba(255,255,255,0.05); }
+        .dark .vol-card { border-left-color: var(--bsa-red); }
+        .dark .trivia-card { border-left-color: #8b5cf6; }
         .image-viewport { width: 100%; aspect-ratio: 1 / 1; position: relative; overflow: hidden; border-radius: 1rem; background: #f1f5f9; -webkit-mask-image: -webkit-radial-gradient(white, black); mask-image: radial-gradient(white, black); transform: translateZ(0); }
         .dark .image-viewport { background: #1e293b; }
         input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: #e2e8f0; border-radius: 5px; outline: none; }
@@ -35,6 +39,16 @@
         textarea::-webkit-scrollbar-track { background: transparent; }
         textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .dark textarea::-webkit-scrollbar-thumb { background: #475569; }
+        
+        /* Trivia specific animations */
+        .trivia-btn { transition: all 0.2s ease; }
+        .trivia-btn:active:not(:disabled) { transform: scale(0.95); }
+        .trivia-correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; animation: pulseCorrect 0.5s ease; }
+        .trivia-incorrect { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; animation: shakeWrong 0.4s ease; }
+        .trivia-dimmed { opacity: 0.5; filter: grayscale(1); }
+        
+        @keyframes pulseCorrect { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes shakeWrong { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body class="min-h-screen relative">
@@ -89,6 +103,7 @@
                 <div id="leader-nav" class="hidden mt-4 flex flex-wrap justify-center md:justify-start gap-2 border-t border-slate-200/50 dark:border-slate-800/50 pt-4">
                     <button onclick="window.switchView('links')" id="tab-links" class="px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm">Resources</button>
                     <button onclick="window.switchView('volunteer')" id="tab-volunteer" class="px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm">Positions</button>
+                    <button onclick="window.switchView('trivia')" id="tab-trivia" class="px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm">Trivia</button>
                 </div>
             </div>
         </header>
@@ -100,6 +115,7 @@
         </div>
     </div>
 
+    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[200] hidden items-center justify-center p-6">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-yellow-400">
             <div class="bg-blue-900 p-5 text-white flex justify-between items-center">
@@ -120,6 +136,7 @@
         </div>
     </div>
 
+    <!-- Main Settings Modal (Links & Branding) -->
     <div id="modal-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[100] hidden items-center justify-center p-4 sm:p-6">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-900">
             <div class="bg-blue-900 p-4 sm:p-5 text-white flex justify-between items-center">
@@ -143,6 +160,7 @@
                         <input id="input-url" class="w-full p-2.5 sm:p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm sm:text-base outline-none dark:text-white transition-all" placeholder="https://...">
                         <select id="input-internal-target" class="w-full p-2.5 sm:p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm sm:text-base outline-none dark:text-white font-bold transition-all hidden cursor-pointer">
                             <option value="#volunteer">Volunteer Positions</option>
+                            <option value="#trivia">Trivia Categories</option>
                         </select>
                     </div>
                     <div id="field-category" class="hidden">
@@ -219,6 +237,7 @@
         </div>
     </div>
 
+    <!-- Volunteer Settings Modal -->
     <div id="volunteer-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-red-600 my-auto">
             <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
@@ -230,6 +249,40 @@
                 <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Short Description</label><input id="vol-description" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white"></div>
                 <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Responsibilities</label><textarea id="vol-responsibilities" rows="4" oninput="window.autoResizeTextarea(this)" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white resize-none overflow-hidden"></textarea></div>
                 <div class="flex justify-end mt-2"><button onclick="window.saveVolunteer()" class="w-full px-8 py-3.5 bg-red-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm">Save Role</button></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trivia Category Modal -->
+    <div id="trivia-cat-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-purple-600 my-auto">
+            <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
+                <h3 class="text-lg font-black uppercase tracking-widest flex items-center gap-2"><i data-lucide="brain-circuit" class="w-5 h-5 text-purple-400"></i> Category</h3>
+                <button onclick="window.closeTriviaCatModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 md:p-8 space-y-4">
+                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Category Name</label><input id="triv-cat-title" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                <div class="flex justify-end mt-4"><button onclick="window.saveTriviaCategory()" class="w-full px-8 py-3.5 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-purple-700 transition-colors">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trivia Question Modal -->
+    <div id="trivia-q-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-purple-600 my-auto">
+            <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
+                <h3 class="text-lg font-black uppercase tracking-widest flex items-center gap-2"><i data-lucide="help-circle" class="w-5 h-5 text-purple-400"></i> Edit Question</h3>
+                <button onclick="window.closeTriviaQuestionModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 md:p-8 space-y-5">
+                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Question Text</label><textarea id="triv-q-text" rows="2" class="w-full p-3 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-base outline-none dark:text-white resize-none"></textarea></div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Answers & Select Correct Option</label>
+                    <div class="space-y-3" id="triv-q-options-container">
+                        <!-- Options generated here by JS -->
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6"><button onclick="window.saveTriviaQuestion()" class="w-full md:w-auto px-8 py-3.5 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-purple-700 transition-colors">Save Question</button></div>
             </div>
         </div>
     </div>
@@ -258,9 +311,15 @@
         let links = JSON.parse(localStorage.getItem('scout_links')) || [{ id: 1, title: 'Scoutbook', url: 'https://scoutbook.scouting.org/', img: '', zoom: 1, x: 0, y: 0, categoryId: 'default' }];
         let settings = { ...defaultSettings, ...(JSON.parse(localStorage.getItem('scout_settings')) || {}) };
         let volunteers = JSON.parse(localStorage.getItem('scout_volunteers')) || [];
+        let trivia = JSON.parse(localStorage.getItem('scout_trivia')) || [];
 
         let currentEditId = null; let currentEditType = null;
         let isDragging = false; let startX, startY;
+        
+        // Trivia State
+        let activeTriviaCatId = null;
+        let activeTriviaQIndex = 0;
+        let activeTriviaAnswers = {}; // e.g. { 0: 2 } meaning question index 0, they selected option index 2
 
         window.showToast = function(msg, isErr = false) {
             const container = document.getElementById('toast-container'); const toast = document.createElement('div');
@@ -294,8 +353,12 @@
                                 localUpdatedAt = cloudUpdatedAt; localStorage.setItem('scout_updatedAt', localUpdatedAt.toString());
                                 if (data.categories) categories = data.categories; if (data.links) links = data.links; if (data.settings) settings = { ...defaultSettings, ...data.settings };
                                 if (data.volunteers) volunteers = data.volunteers;
+                                if (data.trivia) trivia = data.trivia;
                                 window.render();
                             } else { window.syncToCloud(); }
+                        }, (error) => {
+                            console.error("Firebase Error: ", error);
+                            window.showToast("Cloud Connection Error", true);
                         });
                     }
                 });
@@ -307,8 +370,11 @@
             try {
                 localUpdatedAt = Date.now(); localStorage.setItem('scout_updatedAt', localUpdatedAt.toString());
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'packData', 'config');
-                await setDoc(docRef, JSON.parse(JSON.stringify({ links, settings, categories, volunteers, updatedAt: localUpdatedAt })));
-            } catch (error) { window.showToast("Local saved", true); } finally { isSyncing = false; }
+                await setDoc(docRef, JSON.parse(JSON.stringify({ links, settings, categories, volunteers, trivia, updatedAt: localUpdatedAt })));
+            } catch (error) { 
+                console.error("Firebase Sync Error: ", error); 
+                window.showToast("Cloud Sync Failed", true); 
+            } finally { isSyncing = false; }
         };
 
         window.applyDynamicFavicon = function(url, zoom, x, y) {
@@ -348,18 +414,20 @@
 
             document.title = settings.title || 'Scout Hub'; window.applyDynamicFavicon(settings.tabIconUrl || settings.logo || 'https://www.scouting.org/wp-content/uploads/2018/05/cub-scouts-logo.png', settings.tabIconZoom || 1, settings.tabIconX || 0, settings.tabIconY || 0);
 
-            if (isLeader || isAdmin) {
-                leaderNav.classList.remove('hidden');
-                ['links', 'volunteer'].forEach(tab => {
-                    const el = document.getElementById(`tab-${tab}`);
-                    if(el) el.className = `px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm ${currentView === tab ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`;
-                });
-            } else { leaderNav.classList.add('hidden'); if(!['links', 'volunteer'].includes(currentView)) currentView = 'links'; }
+            // Always show internal navs for easier access
+            leaderNav.classList.remove('hidden');
+            ['links', 'volunteer', 'trivia'].forEach(tab => {
+                const el = document.getElementById(`tab-${tab}`);
+                if(el) el.className = `px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm ${currentView.startsWith(tab) ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`;
+            });
 
             container.innerHTML = ''; 
             
             // Render View Routing
             if (currentView === 'volunteer') window.renderVolunteerView(container);
+            else if (currentView === 'trivia') window.renderTriviaView(container);
+            else if (currentView === 'trivia-manage') window.renderTriviaManageView(container);
+            else if (currentView === 'trivia-play') window.renderTriviaPlayView(container);
             else window.renderLinksView(container);
 
             document.getElementById('theme-btn').innerHTML = document.documentElement.classList.contains('dark') ? '<i data-lucide="sun" class="w-4 h-4"></i>' : '<i data-lucide="moon" class="w-4 h-4"></i>';
@@ -370,11 +438,11 @@
             lockBtn.innerHTML = isAdmin || isLeader ? '<i data-lucide="unlock" class="text-blue-900 w-5 h-5"></i>' : '<i data-lucide="lock" class="text-white w-5 h-5"></i>';
 
             const adminBtn = document.getElementById('admin-toggle-btn');
-            if (isAdmin && currentView === 'links') {
+            if (isAdmin && (currentView === 'links' || currentView.startsWith('trivia'))) {
                 adminBtn.classList.remove('hidden');
-                if (isEditing) { adminBtn.innerHTML = '<i data-lucide="settings" class="w-4 h-4 text-blue-900"></i><span class="text-[10px]">Finish Editing</span>'; adminBtn.className = "flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-yellow-400 text-blue-900 font-bold uppercase tracking-widest shadow-lg"; document.getElementById('app-icon-edit-btn').classList.replace('hidden', 'flex'); document.getElementById('header-design-btn').classList.replace('hidden', 'flex'); }
+                if (isEditing) { adminBtn.innerHTML = '<i data-lucide="settings" class="w-4 h-4 text-blue-900"></i><span class="text-[10px]">Finish Editing</span>'; adminBtn.className = "flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-yellow-400 text-blue-900 font-bold uppercase tracking-widest shadow-lg"; if(currentView === 'links') { document.getElementById('app-icon-edit-btn').classList.replace('hidden', 'flex'); document.getElementById('header-design-btn').classList.replace('hidden', 'flex'); } }
                 else { adminBtn.innerHTML = '<i data-lucide="settings" class="w-4 h-4"></i><span class="text-[10px]">Edit Page</span>'; adminBtn.className = "flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 font-bold uppercase tracking-widest shadow-lg"; document.getElementById('app-icon-edit-btn').classList.replace('flex', 'hidden'); document.getElementById('header-design-btn').classList.replace('flex', 'hidden'); }
-            } else { adminBtn.classList.add('hidden'); document.getElementById('app-icon-edit-btn').classList.replace('flex', 'hidden'); document.getElementById('header-design-btn').classList.replace('flex', 'hidden'); if(currentView !== 'links') isEditing = false; }
+            } else { adminBtn.classList.add('hidden'); document.getElementById('app-icon-edit-btn').classList.replace('flex', 'hidden'); document.getElementById('header-design-btn').classList.replace('flex', 'hidden'); if(currentView !== 'links' && !currentView.startsWith('trivia')) isEditing = false; }
 
             const headerBtn = document.getElementById('edit-header-btn'); const textBtn = document.getElementById('edit-text-btn');
             if (isAdmin && isEditing && currentView === 'links') { headerBtn.classList.remove('hidden'); headerBtn.innerHTML = '<i data-lucide="edit-3" class="w-5 h-5"></i>'; if (textBtn) { textBtn.classList.remove('hidden'); textBtn.innerHTML = '<i data-lucide="edit-3" class="w-5 h-5"></i>'; } } 
@@ -386,6 +454,7 @@
             localStorage.setItem('scout_settings', JSON.stringify(settings));
             localStorage.setItem('scout_categories', JSON.stringify(categories));
             localStorage.setItem('scout_volunteers', JSON.stringify(volunteers));
+            localStorage.setItem('scout_trivia', JSON.stringify(trivia));
             localStorage.setItem('scout_updatedAt', localUpdatedAt.toString());
         };
 
@@ -393,6 +462,229 @@
             currentView = view; 
             window.render(); 
         }
+
+        window.handleInternalLink = function(url) {
+            if (url.startsWith('#play-trivia-')) window.playTrivia(url.replace('#play-trivia-', ''));
+            else window.switchView(url.substring(1));
+        };
+
+        /* --- Trivia Functions --- */
+        window.renderTriviaView = function(container) {
+            const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-4xl flex flex-col gap-4';
+            wrapper.innerHTML = `<div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-3"><i data-lucide="brain-circuit" class="w-6 h-6 text-purple-600"></i> Trivia Categories</h2>${(isAdmin && isEditing) ? `<button onclick="window.openTriviaCatModal()" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-lg flex items-center gap-2"><i data-lucide="plus" class="w-3 h-3"></i> Add Category</button>` : ''}</div>`;
+            
+            if (trivia.length === 0) {
+                wrapper.innerHTML += `<div class="text-center py-20 opacity-50 font-bold uppercase tracking-widest text-sm text-slate-500"><i data-lucide="folder-open" class="w-16 h-16 mx-auto mb-4 opacity-50"></i> No Trivia Categories found.</div>`;
+            } else {
+                const grid = document.createElement('div'); grid.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6';
+                trivia.forEach(cat => {
+                    const card = document.createElement('div');
+                    card.className = `trivia-card p-6 flex flex-col justify-between relative group ${isEditing ? 'cursor-default' : 'cursor-pointer'}`;
+                    
+                    const qCount = cat.questions ? cat.questions.length : 0;
+                    
+                    let inner = ``;
+                    if (isAdmin && isEditing) {
+                        inner += `<div class="absolute top-3 right-3 flex gap-1 z-10"><button onclick="window.openTriviaCatModal('${cat.id}')" class="p-2 bg-slate-100 dark:bg-slate-800 text-blue-600 hover:text-blue-800 rounded-lg"><i data-lucide="edit-3" class="w-4 h-4"></i></button><button onclick="window.manageTrivia('${cat.id}')" class="p-2 bg-purple-100 dark:bg-purple-900/40 text-purple-600 hover:text-purple-800 rounded-lg" title="Manage Questions"><i data-lucide="list" class="w-4 h-4"></i></button><button onclick="window.deleteTriviaCategory('${cat.id}')" class="p-2 bg-slate-100 dark:bg-slate-800 text-red-500 hover:text-red-700 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                    }
+                    
+                    inner += `<div class="w-full h-full flex flex-col items-center justify-center text-center pt-2 ${isEditing ? '' : 'pointer-events-none'}"><i data-lucide="help-circle" class="w-10 h-10 text-purple-400 mb-3 opacity-50"></i><h4 class="text-xl font-black text-slate-800 dark:text-slate-100 leading-tight mb-2">${cat.title}</h4><span class="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full text-[10px] font-bold uppercase tracking-widest">${qCount} Questions</span></div>`;
+                    
+                    card.innerHTML = inner;
+                    if (!isEditing) { card.onclick = () => window.playTrivia(cat.id); }
+                    grid.appendChild(card);
+                });
+                wrapper.appendChild(grid);
+            }
+            container.appendChild(wrapper);
+        };
+
+        window.openTriviaCatModal = function(id = null) {
+            currentEditId = id;
+            let cat = id ? trivia.find(c => c.id === id) : null;
+            document.getElementById('triv-cat-title').value = cat ? cat.title : '';
+            document.getElementById('trivia-cat-modal').classList.replace('hidden', 'flex');
+        };
+        window.closeTriviaCatModal = () => document.getElementById('trivia-cat-modal').classList.replace('flex', 'hidden');
+        window.saveTriviaCategory = function() {
+            const title = document.getElementById('triv-cat-title').value.trim();
+            if (!title) return;
+            if (currentEditId) {
+                const cat = trivia.find(c => c.id === currentEditId);
+                if (cat) cat.title = title;
+            } else {
+                trivia.push({ id: 'tcat_' + Date.now(), title: title, questions: [] });
+            }
+            window.closeTriviaCatModal(); window.render(); if (useFirebase) window.syncToCloud();
+        };
+        window.deleteTriviaCategory = function(id) {
+            if (confirm("Delete this entire trivia category?")) {
+                trivia = trivia.filter(c => c.id !== id);
+                window.render(); if (useFirebase) window.syncToCloud();
+            }
+        };
+
+        window.manageTrivia = function(catId) {
+            activeTriviaCatId = catId;
+            currentView = 'trivia-manage';
+            window.render();
+        };
+
+        window.renderTriviaManageView = function(container) {
+            const cat = trivia.find(c => c.id === activeTriviaCatId);
+            if (!cat) { window.switchView('trivia'); return; }
+
+            const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-3xl flex flex-col gap-4';
+            wrapper.innerHTML = `<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4"><div class="flex items-center gap-3"><button onclick="window.switchView('trivia')" class="p-2 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-300 transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i></button><h2 class="text-xl md:text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest leading-none">${cat.title}</h2></div><button onclick="window.openTriviaQuestionModal(null)" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-lg flex items-center gap-2 flex-shrink-0"><i data-lucide="plus" class="w-3 h-3"></i> Add Question</button></div>`;
+
+            const list = document.createElement('div'); list.className = 'flex flex-col gap-4';
+            if (!cat.questions || cat.questions.length === 0) {
+                list.innerHTML = `<div class="text-center py-16 opacity-50 font-bold uppercase tracking-widest text-sm text-slate-500"><i data-lucide="help-circle" class="w-12 h-12 mx-auto mb-3 opacity-50"></i> No questions yet.</div>`;
+            } else {
+                cat.questions.forEach((q, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'p-5 bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between gap-4 relative';
+                    
+                    let optsHTML = `<ul class="mt-2 space-y-1">`;
+                    q.options.forEach((opt, oIdx) => {
+                        const isCorrect = oIdx === q.correctIndex;
+                        optsHTML += `<li class="text-xs ${isCorrect ? 'text-green-600 dark:text-green-400 font-bold' : 'text-slate-500 dark:text-slate-400'} flex items-start gap-1.5"><i data-lucide="${isCorrect ? 'check-circle' : 'circle'}" class="w-3.5 h-3.5 mt-0.5 flex-shrink-0"></i> <span>${opt}</span></li>`;
+                    });
+                    optsHTML += `</ul>`;
+
+                    card.innerHTML = `<div class="flex-grow pr-4"><span class="text-[9px] font-black text-purple-500 uppercase tracking-widest mb-1 block">Question ${idx + 1}</span><h4 class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-100 leading-snug">${q.text}</h4>${optsHTML}</div><div class="flex sm:flex-col gap-2 flex-shrink-0 self-start sm:self-auto"><button onclick="window.openTriviaQuestionModal('${q.id}')" class="px-3 py-2 bg-slate-100 dark:bg-slate-900 text-blue-600 hover:bg-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest"><i data-lucide="edit-3" class="w-4 h-4 sm:mr-0 mr-1 sm:hidden inline"></i> Edit</button><button onclick="window.deleteTriviaQuestion('${q.id}')" class="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 rounded-xl font-bold text-[10px] uppercase tracking-widest"><i data-lucide="trash-2" class="w-4 h-4 sm:mr-0 mr-1 sm:hidden inline"></i> Del</button></div>`;
+                    list.appendChild(card);
+                });
+            }
+            wrapper.appendChild(list);
+            container.appendChild(wrapper);
+        };
+
+        window.openTriviaQuestionModal = function(qId = null) {
+            currentEditId = qId;
+            const cat = trivia.find(c => c.id === activeTriviaCatId);
+            let q = null;
+            if (cat && cat.questions) { q = cat.questions.find(x => x.id === qId); }
+
+            document.getElementById('triv-q-text').value = q ? q.text : '';
+            
+            const optsContainer = document.getElementById('triv-q-options-container');
+            optsContainer.innerHTML = '';
+            for(let i=0; i<4; i++) {
+                const optVal = q && q.options && q.options[i] ? q.options[i] : '';
+                const isChecked = q ? q.correctIndex === i : i === 0;
+                optsContainer.innerHTML += `<div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700"><input type="radio" name="triv-q-correct" value="${i}" ${isChecked ? 'checked' : ''} class="w-5 h-5 text-purple-600 cursor-pointer flex-shrink-0"><input type="text" id="triv-q-opt${i}" value="${optVal}" placeholder="Option ${i+1}" class="w-full p-2 bg-white dark:bg-slate-900 rounded font-bold text-sm outline-none dark:text-white"></div>`;
+            }
+
+            document.getElementById('trivia-q-modal').classList.replace('hidden', 'flex');
+        };
+        window.closeTriviaQuestionModal = () => document.getElementById('trivia-q-modal').classList.replace('flex', 'hidden');
+        window.saveTriviaQuestion = function() {
+            const text = document.getElementById('triv-q-text').value.trim();
+            if (!text) { window.showToast("Question text required", true); return; }
+            
+            let options = [];
+            for(let i=0; i<4; i++) {
+                const val = document.getElementById(`triv-q-opt${i}`).value.trim();
+                options.push(val || `Option ${i+1}`);
+            }
+            const correctIndex = parseInt(document.querySelector('input[name="triv-q-correct"]:checked').value);
+
+            const cat = trivia.find(c => c.id === activeTriviaCatId);
+            if (!cat.questions) cat.questions = [];
+
+            if (currentEditId) {
+                const q = cat.questions.find(x => x.id === currentEditId);
+                if (q) { q.text = text; q.options = options; q.correctIndex = correctIndex; }
+            } else {
+                cat.questions.push({ id: 'tq_' + Date.now(), text, options, correctIndex });
+            }
+
+            window.closeTriviaQuestionModal(); window.render(); if (useFirebase) window.syncToCloud();
+        };
+        window.deleteTriviaQuestion = function(qId) {
+            if (confirm("Delete this question?")) {
+                const cat = trivia.find(c => c.id === activeTriviaCatId);
+                if (cat && cat.questions) {
+                    cat.questions = cat.questions.filter(q => q.id !== qId);
+                    window.render(); if (useFirebase) window.syncToCloud();
+                }
+            }
+        };
+
+        window.playTrivia = function(catId) {
+            const cat = trivia.find(c => c.id === catId);
+            if (!cat || !cat.questions || cat.questions.length === 0) { window.showToast("No questions in this category yet.", true); return; }
+            activeTriviaCatId = catId;
+            activeTriviaQIndex = 0;
+            activeTriviaAnswers = {};
+            currentView = 'trivia-play';
+            window.render();
+        };
+
+        window.answerTrivia = function(optIndex) {
+            // Already answered this question? Do nothing
+            if (activeTriviaAnswers[activeTriviaQIndex] !== undefined) return;
+            
+            activeTriviaAnswers[activeTriviaQIndex] = optIndex;
+            window.render(); // Re-render to show colors
+        };
+
+        window.nextTriviaQ = function() { activeTriviaQIndex++; window.render(); };
+        window.prevTriviaQ = function() { activeTriviaQIndex--; window.render(); };
+
+        window.renderTriviaPlayView = function(container) {
+            const cat = trivia.find(c => c.id === activeTriviaCatId);
+            if (!cat || !cat.questions) { window.switchView('trivia'); return; }
+            const q = cat.questions[activeTriviaQIndex];
+            const total = cat.questions.length;
+            const selectedOpt = activeTriviaAnswers[activeTriviaQIndex];
+            const isAnswered = selectedOpt !== undefined;
+
+            const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-3xl flex flex-col gap-6 items-center justify-center pt-4 md:pt-10';
+            
+            // Header
+            let html = `<div class="flex justify-between items-center w-full mb-4"><button onclick="window.switchView('trivia')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-slate-300 transition-colors"><i data-lucide="arrow-left" class="w-3 h-3"></i> Exit</button><div class="text-[10px] font-black uppercase text-purple-500 tracking-widest px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-800">Question ${activeTriviaQIndex + 1} of ${total}</div></div>`;
+
+            // Question
+            html += `<h2 class="text-2xl md:text-4xl font-black text-slate-800 dark:text-slate-100 text-center leading-tight w-full max-w-2xl px-4">${q.text}</h2>`;
+
+            // Options
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-6">`;
+            q.options.forEach((opt, idx) => {
+                let btnClass = 'trivia-btn w-full p-5 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-2 border-slate-100 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-lg md:text-xl text-center leading-snug cursor-pointer';
+                
+                if (isAnswered) {
+                    btnClass += ' cursor-default';
+                    if (idx === q.correctIndex) {
+                        btnClass += ' trivia-correct';
+                    } else if (idx === selectedOpt) {
+                        btnClass += ' trivia-incorrect';
+                    } else {
+                        btnClass += ' trivia-dimmed';
+                    }
+                } else {
+                    btnClass += ' hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-slate-700';
+                }
+
+                html += `<button class="${btnClass}" ${isAnswered ? 'disabled' : `onclick="window.answerTrivia(${idx})"`}>${opt}</button>`;
+            });
+            html += `</div>`;
+
+            // Controls
+            html += `<div class="flex justify-between w-full mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">`;
+            html += `<button onclick="window.prevTriviaQ()" class="px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors ${activeTriviaQIndex === 0 ? 'opacity-0 pointer-events-none' : 'hover:bg-slate-300'}"><i data-lucide="chevron-left" class="w-4 h-4 inline mr-1"></i> Prev</button>`;
+            if (activeTriviaQIndex < total - 1) {
+                html += `<button onclick="window.nextTriviaQ()" class="px-8 py-3 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-purple-700 transition-all active:scale-95 ${!isAnswered ? 'opacity-50 pointer-events-none' : 'animate-pulse'}">Next <i data-lucide="chevron-right" class="w-4 h-4 inline ml-1"></i></button>`;
+            } else {
+                html += `<button onclick="window.switchView('trivia')" class="px-8 py-3 bg-green-500 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-green-600 transition-all active:scale-95 ${!isAnswered ? 'opacity-50 pointer-events-none' : ''}"><i data-lucide="check" class="w-4 h-4 inline mr-1"></i> Finish</button>`;
+            }
+            html += `</div>`;
+
+            wrapper.innerHTML = html;
+            container.appendChild(wrapper);
+        };
+        /* --- End Trivia Functions --- */
 
         window.renderVolunteerView = function(container) {
             const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-4xl flex flex-col gap-4';
@@ -438,7 +730,7 @@
                     if (isExpired && !isEditing) return;
 
                     const card = document.createElement('div'); card.className = `link-card relative group ${isEditing ? 'cursor-move' : ''}`; card.dataset.id = link.id;
-                    const isInt = link.url && link.url.startsWith('#'); const tUrl = isEditing || isInt ? 'javascript:void(0)' : link.url; const oc = !isEditing && isInt ? `onclick="window.switchView('${link.url.substring(1)}'); return false;"` : '';
+                    const isInt = link.url && link.url.startsWith('#'); const tUrl = isEditing || isInt ? 'javascript:void(0)' : link.url; const oc = !isEditing && isInt ? `onclick="window.handleInternalLink('${link.url}'); return false;"` : '';
                     
                     const expiredBadge = isExpired && isEditing ? `<div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full z-30 shadow-md whitespace-nowrap">Expired</div>` : '';
                     const opacityClass = isExpired ? 'opacity-50 grayscale' : '';
@@ -480,7 +772,7 @@
         window.openHeaderModal = function() { currentEditId = 'header'; currentEditType = 'header'; document.getElementById('modal-title').innerText = "Identity Settings"; document.getElementById('label-url').innerText = "Subtitle"; document.getElementById('label-image').innerText = "Main Logo URL"; document.getElementById('input-title').value = settings.title || ''; document.getElementById('input-url').value = settings.subtitle || ''; document.getElementById('input-image').value = settings.logo || ''; document.getElementById('input-zoom').value = settings.zoom || 1; document.getElementById('input-override-colors').checked = !!settings.overrideColors; document.getElementById('color-pickers-wrapper').style.display = settings.overrideColors ? 'grid' : 'none'; document.getElementById('input-title-color').value = settings.titleColor || '#1e3a8a'; document.getElementById('input-subtitle-color').value = settings.subtitleColor || '#64748b'; document.getElementById('input-show-header-link').checked = settings.showHeaderLink !== false; document.getElementById('input-header-link-text').value = settings.headerLinkText || 'my.scouting.org'; document.getElementById('input-header-link-url').value = settings.headerLinkUrl || 'https://my.scouting.org'; document.getElementById('input-link-type').parentElement.classList.add('hidden'); document.getElementById('input-url').classList.remove('hidden'); document.getElementById('input-internal-target').classList.add('hidden'); setModalVis('header'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.openAppIconModal = function() { currentEditId = 'app-icon'; currentEditType = 'app-icon'; document.getElementById('modal-title').innerText = "Browser Tab & App Icon"; document.getElementById('label-image').innerText = "Icon URL"; document.getElementById('input-image').value = settings.tabIconUrl || ''; document.getElementById('input-zoom').value = settings.tabIconZoom || 1; setModalVis('app-icon'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.openHeaderDesignModal = function() { currentEditId = 'header-design'; currentEditType = 'header-design'; document.getElementById('modal-title').innerText = "Header Background"; document.getElementById('input-header-bg-type').value = settings.headerBgType || 'default'; document.getElementById('input-header-bg-color').value = settings.headerBgColor || '#ffffff'; document.getElementById('input-header-border-color').value = settings.headerBorderColor || '#facc15'; document.getElementById('input-header-bg-image').value = settings.headerBgImage || ''; document.getElementById('input-zoom').value = settings.headerBgZoom || 1; document.getElementById('input-override-colors').checked = !!settings.overrideColors; document.getElementById('color-pickers-wrapper').style.display = settings.overrideColors ? 'grid' : 'none'; document.getElementById('input-title-color').value = settings.titleColor || '#1e3a8a'; document.getElementById('input-subtitle-color').value = settings.subtitleColor || '#64748b'; document.getElementById('input-show-header-link').checked = settings.showHeaderLink !== false; document.getElementById('input-header-link-text').value = settings.headerLinkText || 'my.scouting.org'; document.getElementById('input-header-link-url').value = settings.headerLinkUrl || 'https://my.scouting.org'; setModalVis('header-design'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
-        window.editLink = function(id) { currentEditId = id; currentEditType = 'link'; const link = links.find(l => l.id === id); document.getElementById('modal-title').innerText = "Tile Settings"; document.getElementById('label-url').innerText = "Target / URL"; document.getElementById('label-image').innerText = "Image URL"; document.getElementById('input-title').value = link.title; document.getElementById('input-image').value = link.img; document.getElementById('input-zoom').value = link.zoom || 1; document.getElementById('input-link-custom-bg-enable').checked = !!link.customBg; document.getElementById('input-link-bg').disabled = !link.customBg; document.getElementById('input-link-bg').value = link.bgColor || '#ffffff'; document.getElementById('input-link-is-event').checked = !!link.isEvent; document.getElementById('link-event-date-wrapper').style.display = link.isEvent ? 'block' : 'none'; document.getElementById('input-link-event-date').value = link.eventDate || ''; document.getElementById('input-link-type').parentElement.classList.remove('hidden'); const isInt = link.url && link.url.startsWith('#'); document.getElementById('input-link-type').value = isInt ? 'internal' : 'external'; if(isInt) document.getElementById('input-internal-target').value = link.url; else document.getElementById('input-url').value = link.url; window.toggleLinkType(); const sel = document.getElementById('input-category'); sel.innerHTML = ''; categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat.id; opt.innerText = cat.title; if (cat.id === link.categoryId) opt.selected = true; sel.appendChild(opt); }); setModalVis('link'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
+        window.editLink = function(id) { currentEditId = id; currentEditType = 'link'; const link = links.find(l => l.id === id); document.getElementById('modal-title').innerText = "Tile Settings"; document.getElementById('label-url').innerText = "Target / URL"; document.getElementById('label-image').innerText = "Image URL"; document.getElementById('input-title').value = link.title; document.getElementById('input-image').value = link.img; document.getElementById('input-zoom').value = link.zoom || 1; document.getElementById('input-link-custom-bg-enable').checked = !!link.customBg; document.getElementById('input-link-bg').disabled = !link.customBg; document.getElementById('input-link-bg').value = link.bgColor || '#ffffff'; document.getElementById('input-link-is-event').checked = !!link.isEvent; document.getElementById('link-event-date-wrapper').style.display = link.isEvent ? 'block' : 'none'; document.getElementById('input-link-event-date').value = link.eventDate || ''; document.getElementById('input-link-type').parentElement.classList.remove('hidden'); const intTarget = document.getElementById('input-internal-target'); intTarget.innerHTML = '<option value="#volunteer">Volunteer Positions</option><option value="#trivia">Trivia Categories (Main Page)</option>'; trivia.forEach(cat => { const opt = document.createElement('option'); opt.value = '#play-trivia-' + cat.id; opt.innerText = 'Trivia: ' + cat.title; intTarget.appendChild(opt); }); const isInt = link.url && link.url.startsWith('#'); document.getElementById('input-link-type').value = isInt ? 'internal' : 'external'; if(isInt) intTarget.value = link.url; else document.getElementById('input-url').value = link.url; window.toggleLinkType(); const sel = document.getElementById('input-category'); sel.innerHTML = ''; categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat.id; opt.innerText = cat.title; if (cat.id === link.categoryId) opt.selected = true; sel.appendChild(opt); }); setModalVis('link'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.addNewLink = function(cid) { const id = Date.now(); links.push({ id, title: 'New Link', url: '', img: '', zoom: 1, x: 0, y: 0, categoryId: cid, customBg: false, bgColor: '#ffffff', isEvent: false, eventDate: '' }); window.editLink(id); };
         window.deleteLink = function(id) { if (confirm("Remove tile?")) { links = links.filter(l => l.id !== id); window.render(); if(useFirebase) window.syncToCloud(); } };
         window.editCategory = function(id) { currentEditId = id; currentEditType = 'category'; document.getElementById('modal-title').innerText = "Category Name"; document.getElementById('input-title').value = categories.find(c => c.id === id).title; setModalVis('category'); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); }
