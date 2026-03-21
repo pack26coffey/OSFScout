@@ -684,6 +684,7 @@
             
             // Calculate Score
             let score = 0;
+            let attempted = Object.keys(activeTriviaAnswers).length;
             Object.keys(activeTriviaAnswers).forEach(qIdx => {
                 if (cat.questions[qIdx].correctIndex === activeTriviaAnswers[qIdx]) score++;
             });
@@ -694,7 +695,7 @@
             // Header with Score Display
             let html = `<div class="flex justify-between items-center w-full mb-2">`;
             html += `<button onclick="window.switchView('trivia')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-slate-300 transition-colors"><i data-lucide="arrow-left" class="w-3 h-3"></i> Exit</button>`;
-            html += `<div class="flex items-center gap-2"><div class="text-[10px] font-black uppercase text-purple-600 dark:text-purple-400 tracking-widest px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-800 flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i> Score: ${score}</div><button onclick="window.resetTriviaScore()" class="p-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full hover:bg-red-200 transition-colors" title="Reset Score"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button></div>`;
+            html += `<div class="flex items-center gap-2"><div class="text-[10px] font-black uppercase text-purple-600 dark:text-purple-400 tracking-widest px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-800 flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i> Score: ${score} / ${attempted}</div><button onclick="window.resetTriviaScore()" class="p-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full hover:bg-red-200 transition-colors" title="Reset Score"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button></div>`;
             html += `<div class="text-[10px] font-black uppercase text-slate-500 tracking-widest px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">Q ${activeTriviaQIndex + 1}/${total}</div></div>`;
 
             // Question (Condensed text size)
