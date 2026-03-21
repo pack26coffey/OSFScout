@@ -414,12 +414,20 @@
 
             document.title = settings.title || 'Scout Hub'; window.applyDynamicFavicon(settings.tabIconUrl || settings.logo || 'https://www.scouting.org/wp-content/uploads/2018/05/cub-scouts-logo.png', settings.tabIconZoom || 1, settings.tabIconX || 0, settings.tabIconY || 0);
 
-            // Always show internal navs for easier access
-            leaderNav.classList.remove('hidden');
-            ['links', 'volunteer', 'trivia'].forEach(tab => {
-                const el = document.getElementById(`tab-${tab}`);
-                if(el) el.className = `px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm ${currentView.startsWith(tab) ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`;
-            });
+            // Hide/show leader nav based on admin status
+            if (isAdmin || isLeader) {
+                leaderNav.classList.remove('hidden');
+                ['links', 'volunteer', 'trivia'].forEach(tab => {
+                    const el = document.getElementById(`tab-${tab}`);
+                    if(el) el.className = `px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm ${currentView.startsWith(tab) ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`;
+                });
+            } else {
+                leaderNav.classList.add('hidden');
+                // Make sure users don't get booted out of playing trivia if they clicked a tile
+                if (currentView !== 'links' && !currentView.startsWith('trivia-play')) {
+                    currentView = 'links';
+                }
+            }
 
             container.innerHTML = ''; 
             
@@ -537,13 +545,19 @@
             const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-3xl flex flex-col gap-4';
             wrapper.innerHTML = `<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4"><div class="flex items-center gap-3"><button onclick="window.switchView('trivia')" class="p-2 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-300 transition-colors"><i data-lucide="arrow-left" class="w-5 h-5"></i></button><h2 class="text-xl md:text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest leading-none">${cat.title}</h2></div><button onclick="window.openTriviaQuestionModal(null)" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-lg flex items-center gap-2 flex-shrink-0"><i data-lucide="plus" class="w-3 h-3"></i> Add Question</button></div>`;
 
-            const list = document.createElement('div'); list.className = 'flex flex-col gap-4';
+            const list = document.createElement('div'); 
+            list.id = 'trivia-q-list';
+            list.className = 'flex flex-col gap-3';
+            
             if (!cat.questions || cat.questions.length === 0) {
                 list.innerHTML = `<div class="text-center py-16 opacity-50 font-bold uppercase tracking-widest text-sm text-slate-500"><i data-lucide="help-circle" class="w-12 h-12 mx-auto mb-3 opacity-50"></i> No questions yet.</div>`;
             } else {
                 cat.questions.forEach((q, idx) => {
                     const card = document.createElement('div');
-                    card.className = 'p-5 bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between gap-4 relative';
+                    card.dataset.id = q.id;
+                    card.className = 'p-4 pl-10 bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between gap-4 relative group';
+                    
+                    const handleHtml = `<div class="triv-q-drag-handle absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 cursor-move transition-colors"><i data-lucide="grip-vertical" class="w-5 h-5"></i></div>`;
                     
                     let optsHTML = `<ul class="mt-2 space-y-1">`;
                     q.options.forEach((opt, oIdx) => {
@@ -552,12 +566,33 @@
                     });
                     optsHTML += `</ul>`;
 
-                    card.innerHTML = `<div class="flex-grow pr-4"><span class="text-[9px] font-black text-purple-500 uppercase tracking-widest mb-1 block">Question ${idx + 1}</span><h4 class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-100 leading-snug">${q.text}</h4>${optsHTML}</div><div class="flex sm:flex-col gap-2 flex-shrink-0 self-start sm:self-auto"><button onclick="window.openTriviaQuestionModal('${q.id}')" class="px-3 py-2 bg-slate-100 dark:bg-slate-900 text-blue-600 hover:bg-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest"><i data-lucide="edit-3" class="w-4 h-4 sm:mr-0 mr-1 sm:hidden inline"></i> Edit</button><button onclick="window.deleteTriviaQuestion('${q.id}')" class="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 rounded-xl font-bold text-[10px] uppercase tracking-widest"><i data-lucide="trash-2" class="w-4 h-4 sm:mr-0 mr-1 sm:hidden inline"></i> Del</button></div>`;
+                    card.innerHTML = `${handleHtml}<div class="flex-grow pr-2"><span class="text-[9px] font-black text-purple-500 uppercase tracking-widest mb-1 block">Question ${idx + 1}</span><h4 class="text-sm md:text-base font-bold text-slate-800 dark:text-slate-100 leading-snug">${q.text}</h4>${optsHTML}</div><div class="flex sm:flex-col gap-2 flex-shrink-0 self-start sm:self-auto"><button onclick="window.openTriviaQuestionModal('${q.id}')" class="px-3 py-2 bg-slate-100 dark:bg-slate-900 text-blue-600 hover:bg-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest"><i data-lucide="edit-3" class="w-4 h-4 sm:mr-0 mr-1 sm:hidden inline"></i> Edit</button><button onclick="window.deleteTriviaQuestion('${q.id}')" class="px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 rounded-xl font-bold text-[10px] uppercase tracking-widest"><i data-lucide="trash-2" class="w-4 h-4 sm:mr-0 mr-1 sm:hidden inline"></i> Del</button></div>`;
                     list.appendChild(card);
                 });
             }
             wrapper.appendChild(list);
             container.appendChild(wrapper);
+            
+            // Initialize Sortable for drag and drop
+            if (isAdmin && window.Sortable) {
+                setTimeout(() => {
+                    const el = document.getElementById('trivia-q-list');
+                    if (el) {
+                        new Sortable(el, {
+                            animation: 250,
+                            handle: '.triv-q-drag-handle',
+                            onEnd: function() {
+                                const newIds = Array.from(el.children).map(c => c.dataset.id);
+                                const cat = trivia.find(c => c.id === activeTriviaCatId);
+                                if (cat && cat.questions) {
+                                    cat.questions = newIds.map(id => cat.questions.find(q => q.id === id));
+                                    if (useFirebase) window.syncToCloud();
+                                }
+                            }
+                        });
+                    }
+                }, 50);
+            }
         };
 
         window.openTriviaQuestionModal = function(qId = null) {
@@ -623,15 +658,21 @@
         };
 
         window.answerTrivia = function(optIndex) {
-            // Already answered this question? Do nothing
             if (activeTriviaAnswers[activeTriviaQIndex] !== undefined) return;
-            
             activeTriviaAnswers[activeTriviaQIndex] = optIndex;
-            window.render(); // Re-render to show colors
+            window.render(); 
         };
 
         window.nextTriviaQ = function() { activeTriviaQIndex++; window.render(); };
         window.prevTriviaQ = function() { activeTriviaQIndex--; window.render(); };
+        
+        window.resetTriviaScore = function() {
+            if (confirm("Reset your score and start over?")) {
+                activeTriviaAnswers = {};
+                activeTriviaQIndex = 0;
+                window.render();
+            }
+        };
 
         window.renderTriviaPlayView = function(container) {
             const cat = trivia.find(c => c.id === activeTriviaCatId);
@@ -640,19 +681,29 @@
             const total = cat.questions.length;
             const selectedOpt = activeTriviaAnswers[activeTriviaQIndex];
             const isAnswered = selectedOpt !== undefined;
-
-            const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-3xl flex flex-col gap-6 items-center justify-center pt-4 md:pt-10';
             
-            // Header
-            let html = `<div class="flex justify-between items-center w-full mb-4"><button onclick="window.switchView('trivia')" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-slate-300 transition-colors"><i data-lucide="arrow-left" class="w-3 h-3"></i> Exit</button><div class="text-[10px] font-black uppercase text-purple-500 tracking-widest px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-800">Question ${activeTriviaQIndex + 1} of ${total}</div></div>`;
+            // Calculate Score
+            let score = 0;
+            Object.keys(activeTriviaAnswers).forEach(qIdx => {
+                if (cat.questions[qIdx].correctIndex === activeTriviaAnswers[qIdx]) score++;
+            });
 
-            // Question
-            html += `<h2 class="text-2xl md:text-4xl font-black text-slate-800 dark:text-slate-100 text-center leading-tight w-full max-w-2xl px-4">${q.text}</h2>`;
+            // Condensed padding here
+            const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-3xl flex flex-col gap-3 items-center justify-center pt-2 md:pt-4';
+            
+            // Header with Score Display
+            let html = `<div class="flex justify-between items-center w-full mb-2">`;
+            html += `<button onclick="window.switchView('trivia')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-slate-300 transition-colors"><i data-lucide="arrow-left" class="w-3 h-3"></i> Exit</button>`;
+            html += `<div class="flex items-center gap-2"><div class="text-[10px] font-black uppercase text-purple-600 dark:text-purple-400 tracking-widest px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-800 flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i> Score: ${score}</div><button onclick="window.resetTriviaScore()" class="p-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full hover:bg-red-200 transition-colors" title="Reset Score"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button></div>`;
+            html += `<div class="text-[10px] font-black uppercase text-slate-500 tracking-widest px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">Q ${activeTriviaQIndex + 1}/${total}</div></div>`;
 
-            // Options
-            html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mt-6">`;
+            // Question (Condensed text size)
+            html += `<h2 class="text-lg md:text-2xl font-black text-slate-800 dark:text-slate-100 text-center leading-tight w-full max-w-2xl px-2 mb-2">${q.text}</h2>`;
+
+            // Options (Condensed gap and padding)
+            html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mt-2">`;
             q.options.forEach((opt, idx) => {
-                let btnClass = 'trivia-btn w-full p-5 md:p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border-2 border-slate-100 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-lg md:text-xl text-center leading-snug cursor-pointer';
+                let btnClass = 'trivia-btn w-full p-3 md:p-4 bg-white dark:bg-slate-800 rounded-xl shadow-md border-2 border-slate-100 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-base md:text-lg text-center leading-snug cursor-pointer';
                 
                 if (isAnswered) {
                     btnClass += ' cursor-default';
@@ -671,13 +722,13 @@
             });
             html += `</div>`;
 
-            // Controls
-            html += `<div class="flex justify-between w-full mt-8 border-t border-slate-200 dark:border-slate-800 pt-6">`;
-            html += `<button onclick="window.prevTriviaQ()" class="px-6 py-3 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors ${activeTriviaQIndex === 0 ? 'opacity-0 pointer-events-none' : 'hover:bg-slate-300'}"><i data-lucide="chevron-left" class="w-4 h-4 inline mr-1"></i> Prev</button>`;
+            // Controls (Condensed top margin and padding)
+            html += `<div class="flex justify-between w-full mt-4 border-t border-slate-200 dark:border-slate-800 pt-4">`;
+            html += `<button onclick="window.prevTriviaQ()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors ${activeTriviaQIndex === 0 ? 'opacity-0 pointer-events-none' : 'hover:bg-slate-300'}"><i data-lucide="chevron-left" class="w-4 h-4 inline mr-1"></i> Prev</button>`;
             if (activeTriviaQIndex < total - 1) {
-                html += `<button onclick="window.nextTriviaQ()" class="px-8 py-3 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-purple-700 transition-all active:scale-95 ${!isAnswered ? 'opacity-50 pointer-events-none' : 'animate-pulse'}">Next <i data-lucide="chevron-right" class="w-4 h-4 inline ml-1"></i></button>`;
+                html += `<button onclick="window.nextTriviaQ()" class="px-6 py-2 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-md hover:bg-purple-700 transition-all active:scale-95 ${!isAnswered ? 'opacity-50 pointer-events-none' : 'animate-pulse'}">Next <i data-lucide="chevron-right" class="w-4 h-4 inline ml-1"></i></button>`;
             } else {
-                html += `<button onclick="window.switchView('trivia')" class="px-8 py-3 bg-green-500 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-green-600 transition-all active:scale-95 ${!isAnswered ? 'opacity-50 pointer-events-none' : ''}"><i data-lucide="check" class="w-4 h-4 inline mr-1"></i> Finish</button>`;
+                html += `<button onclick="window.switchView('trivia')" class="px-6 py-2 bg-green-500 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-md hover:bg-green-600 transition-all active:scale-95 ${!isAnswered ? 'opacity-50 pointer-events-none' : ''}"><i data-lucide="check" class="w-4 h-4 inline mr-1"></i> Finish</button>`;
             }
             html += `</div>`;
 
