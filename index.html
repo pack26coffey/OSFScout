@@ -169,6 +169,14 @@
                         <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block tracking-widest">Category</label>
                         <select id="input-category" class="w-full p-2.5 sm:p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-bold outline-none dark:text-white transition-all cursor-pointer"></select>
                     </div>
+                    
+                    <div id="field-link-master" class="hidden flex-col gap-2 mt-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="flex items-center gap-2.5">
+                            <input type="checkbox" id="input-link-is-master" class="w-4 h-4 cursor-pointer">
+                            <label class="text-[11px] font-black uppercase text-slate-600 dark:text-slate-300 tracking-widest cursor-pointer" for="input-link-is-master">Is Master Tile? (Appears above categories)</label>
+                        </div>
+                    </div>
+
                     <div id="field-header-type" class="hidden">
                         <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block tracking-widest">Background Style</label>
                         <select id="input-header-bg-type" onchange="window.updatePreview()" class="w-full p-2.5 sm:p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-bold outline-none dark:text-white cursor-pointer">
@@ -297,6 +305,10 @@
                 <button onclick="window.closeTimelineConfigModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
             <div class="p-5 sm:p-6 md:p-8 space-y-4">
+                <div class="col-span-2">
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Timeline Page Title</label>
+                    <input id="tl-page-title" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white">
+                </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Start Year</label><input id="tl-start-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
                     <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">End Year</label><input id="tl-end-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
@@ -349,7 +361,7 @@
         let trivia = JSON.parse(localStorage.getItem('scout_trivia')) || [];
         
         // Timeline Data
-        let timelineConfig = JSON.parse(localStorage.getItem('scout_timeline_config')) || { startYear: 1910, endYear: new Date().getFullYear() + 10 };
+        let timelineConfig = JSON.parse(localStorage.getItem('scout_timeline_config')) || { startYear: 1910, endYear: new Date().getFullYear() + 10, pageTitle: 'Pack Timeline' };
         let timeline = JSON.parse(localStorage.getItem('scout_timeline')) || [];
 
         let currentEditId = null; let currentEditType = null;
@@ -394,7 +406,7 @@
                                 if (data.volunteers) volunteers = data.volunteers;
                                 if (data.trivia) trivia = data.trivia;
                                 if (data.timeline) timeline = data.timeline;
-                                if (data.timelineConfig) timelineConfig = data.timelineConfig;
+                                if (data.timelineConfig) timelineConfig = { ...{ startYear: 1910, endYear: new Date().getFullYear() + 10, pageTitle: 'Pack Timeline' }, ...data.timelineConfig };
                                 window.render();
                             } else { window.syncToCloud(); }
                         }, (error) => {
@@ -523,7 +535,7 @@
         window.renderTimelineView = function(container) {
             const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-5xl flex flex-col gap-4 relative pb-20';
             
-            let headerHtml = `<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"><h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-3"><i data-lucide="clock" class="w-6 h-6 text-blue-600"></i> Pack Timeline</h2>`;
+            let headerHtml = `<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"><h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-3"><i data-lucide="clock" class="w-6 h-6 text-blue-600"></i> ${timelineConfig.pageTitle || 'Pack Timeline'}</h2>`;
             if (isAdmin && isEditing) {
                 headerHtml += `<div class="flex gap-2"><button onclick="window.openTimelineConfigModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="settings" class="w-3 h-3"></i> Config</button><button onclick="window.openTimelineEntryModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="plus" class="w-3 h-3"></i> Add Event</button></div>`;
             }
@@ -586,15 +598,18 @@
         };
 
         window.openTimelineConfigModal = function() {
+            document.getElementById('tl-page-title').value = timelineConfig.pageTitle || 'Pack Timeline';
             document.getElementById('tl-start-year').value = timelineConfig.startYear;
             document.getElementById('tl-end-year').value = timelineConfig.endYear;
             document.getElementById('timeline-config-modal').classList.replace('hidden', 'flex');
         };
         window.closeTimelineConfigModal = () => document.getElementById('timeline-config-modal').classList.replace('flex', 'hidden');
         window.saveTimelineConfig = function() {
+            const pageTitle = document.getElementById('tl-page-title').value.trim() || 'Pack Timeline';
             const sy = parseInt(document.getElementById('tl-start-year').value);
             const ey = parseInt(document.getElementById('tl-end-year').value);
             if (!isNaN(sy) && !isNaN(ey) && sy <= ey) {
+                timelineConfig.pageTitle = pageTitle;
                 timelineConfig.startYear = sy;
                 timelineConfig.endYear = ey;
                 window.closeTimelineConfigModal();
@@ -922,16 +937,64 @@
         window.deleteVolunteer = function(id) { if(confirm("Remove?")) { volunteers = volunteers.filter(v => v.id !== id); window.render(); if (useFirebase) window.syncToCloud(); } }
 
         window.renderLinksView = function(container) {
-            const cw = document.createElement('div'); cw.id = 'category-wrapper'; cw.className = 'flex flex-wrap justify-center gap-6 md:gap-8 items-start w-full';
-            
             const today = new Date(); today.setHours(0, 0, 0, 0);
 
+            // Render Master Tiles First
+            const masterLinks = links.filter(l => l.isMasterTile);
+            if (masterLinks.length > 0 || isEditing) {
+                const masterWrapper = document.createElement('div');
+                masterWrapper.id = 'master-tiles-wrapper';
+                masterWrapper.className = 'flex flex-col gap-4 w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto mb-8 md:mb-12';
+                
+                masterLinks.forEach(link => {
+                    let isExpired = false;
+                    if (link.isEvent && link.eventDate) {
+                        const [y, m, d] = link.eventDate.split('-').map(Number);
+                        const expDate = new Date(y, m - 1, d);
+                        expDate.setDate(expDate.getDate() + 1);
+                        if (today >= expDate) isExpired = true;
+                    }
+                    if (isExpired && !isEditing) return;
+
+                    const card = document.createElement('div');
+                    card.className = `master-link-card w-full relative group ${isEditing ? 'cursor-move' : ''}`;
+                    card.dataset.id = link.id;
+
+                    const isInt = link.url && link.url.startsWith('#'); 
+                    const tUrl = isEditing || isInt ? 'javascript:void(0)' : link.url; 
+                    const oc = !isEditing && isInt ? `onclick="window.handleInternalLink('${link.url}'); return false;"` : '';
+                    const expiredBadge = isExpired && isEditing ? `<div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-full z-30 shadow-md whitespace-nowrap">Expired</div>` : '';
+                    const opacityClass = isExpired ? 'opacity-50 grayscale' : '';
+                    
+                    const editBtns = isEditing ? `<div class="absolute top-2 right-2 z-20 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity no-drag cursor-default"><button onclick="window.editLink(${link.id})" class="p-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-500"><i data-lucide="edit-2" class="w-4 h-4"></i></button><button onclick="window.deleteLink(${link.id})" class="p-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>` : '';
+
+                    card.innerHTML = `${expiredBadge}${editBtns}
+                    <a href="${tUrl}" ${oc} target="${isInt ? '_self' : '_blank'}" class="scout-card p-4 sm:p-5 flex flex-row items-center justify-start text-left block h-full ${opacityClass} ${isEditing?'pointer-events-none':''} w-full">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden relative flex-shrink-0 border-2 border-slate-100 dark:border-slate-700 shadow-sm" style="${link.customBg ? `background-color: ${link.bgColor};` : 'background-color: #f1f5f9;'}">
+                            <img src="${link.img || 'https://www.scouting.org/wp-content/uploads/2018/05/cub-scouts-logo.png'}" style="transform: translate(${link.x || 0}%, ${link.y || 0}%) scale(${link.zoom || 1}); opacity: ${link.img ? 1 : 0.1}" class="absolute inset-0 w-full h-full object-contain pointer-events-none">
+                        </div>
+                        <div class="ml-4 sm:ml-6 flex-1 pr-16 sm:pr-20">
+                            <span class="text-blue-900 dark:text-slate-200 font-black uppercase tracking-widest text-base sm:text-xl md:text-2xl line-clamp-2 leading-tight drop-shadow-sm">${link.title}</span>
+                            <div class="text-[10px] sm:text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest hidden sm:block">${link.categoryId && categories.find(c=>c.id===link.categoryId) ? categories.find(c=>c.id===link.categoryId).title : 'Master Link'}</div>
+                        </div>
+                    </a>`;
+                    masterWrapper.appendChild(card);
+                });
+                
+                if (masterLinks.length > 0) {
+                    container.appendChild(masterWrapper);
+                }
+            }
+
+            // Render Category Wrapper
+            const cw = document.createElement('div'); cw.id = 'category-wrapper'; cw.className = 'flex flex-wrap justify-center gap-6 md:gap-8 items-start w-full';
+            
             categories.forEach(cat => {
                 const sec = document.createElement('div'); sec.className = 'category-section w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] min-w-[300px] max-w-lg bg-slate-100 dark:bg-slate-800 rounded-[3rem] p-6 sm:p-8 shadow-xl border border-white dark:border-slate-700 flex flex-col relative'; sec.dataset.id = cat.id;
                 sec.innerHTML = `<div class="flex items-center justify-between gap-4 mb-6 px-2"><h2 class="text-blue-900 dark:text-blue-400 font-black uppercase tracking-widest text-lg">${cat.title}</h2>${isEditing ? `<div class="flex gap-2 no-drag"><button class="category-drag-handle p-2 bg-white text-slate-400 cursor-move"><i data-lucide="grip-horizontal" class="w-4 h-4 pointer-events-none"></i></button><button onclick="window.editCategory('${cat.id}')" class="p-2 bg-white text-slate-400"><i data-lucide="edit-3" class="w-4 h-4"></i></button><button onclick="window.deleteCategory('${cat.id}')" class="p-2 bg-white text-slate-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>` : ''}</div>`;
                 const grid = document.createElement('div'); grid.className = 'link-grid grid grid-cols-3 gap-3 sm:gap-4 min-h-[120px]'; grid.dataset.categoryId = cat.id;
                 
-                links.filter(l => l.categoryId === cat.id).forEach(link => {
+                links.filter(l => l.categoryId === cat.id && !l.isMasterTile).forEach(link => {
                     let isExpired = false;
                     if (link.isEvent && link.eventDate) {
                         const [y, m, d] = link.eventDate.split('-').map(Number);
@@ -956,9 +1019,45 @@
             });
             container.appendChild(cw);
             if (isEditing) { const aw = document.createElement('div'); aw.className = 'mt-12 flex justify-center w-full'; aw.innerHTML = `<button onclick="window.addNewCategory()" class="px-8 py-4 bg-white border-4 border-dashed border-slate-300 rounded-[2rem] text-slate-400 font-black uppercase tracking-widest flex items-center gap-3"><i data-lucide="plus-circle" class="w-6 h-6"></i> Add Category</button>`; container.appendChild(aw); }
+            
             if (isEditing && window.Sortable) {
+                // Sorting for Master Tiles
+                const mw = document.getElementById('master-tiles-wrapper');
+                if (mw) {
+                    new Sortable(mw, {
+                        animation: 250,
+                        handle: '.master-link-card',
+                        onEnd: function() {
+                            let nonMasters = links.filter(l => !l.isMasterTile);
+                            let newMasters = Array.from(mw.children).map(c => links.find(l => l.id === parseInt(c.dataset.id))).filter(Boolean);
+                            links = [...newMasters, ...nonMasters];
+                            if (useFirebase) window.syncToCloud();
+                        }
+                    });
+                }
+
+                // Sorting for Categories
                 new Sortable(document.getElementById('category-wrapper'), { animation: 250, handle: '.category-drag-handle', onEnd: function() { categories = Array.from(document.querySelectorAll('.category-section')).map(el => categories.find(c => c.id === el.dataset.id)); if (useFirebase) window.syncToCloud(); } });
-                document.querySelectorAll('.link-grid').forEach(g => new Sortable(g, { group: 'shared-links', animation: 250, filter: '.no-drag', onMove: (e) => e.related.className.indexOf('no-drag') === -1, onEnd: function() { const nl = []; document.querySelectorAll('.link-grid').forEach(gr => gr.querySelectorAll('.link-card').forEach(c => { const l = links.find(lk => lk.id === parseInt(c.dataset.id)); if (l) { l.categoryId = gr.dataset.categoryId; nl.push(l); } })); links = nl; if (useFirebase) window.syncToCloud(); } }));
+                
+                // Sorting for Regular Links in Categories
+                document.querySelectorAll('.link-grid').forEach(g => new Sortable(g, { 
+                    group: 'shared-links', 
+                    animation: 250, 
+                    filter: '.no-drag', 
+                    onMove: (e) => e.related.className.indexOf('no-drag') === -1, 
+                    onEnd: function() { 
+                        let masters = links.filter(l => l.isMasterTile);
+                        let newRegulars = [];
+                        document.querySelectorAll('.link-grid').forEach(gr => 
+                            gr.querySelectorAll('.link-card').forEach(c => { 
+                                const l = links.find(lk => lk.id === parseInt(c.dataset.id)); 
+                                if (l) { l.categoryId = gr.dataset.categoryId; newRegulars.push(l); } 
+                            })
+                        ); 
+                        links = [...masters, ...newRegulars];
+                        if (useFirebase) window.syncToCloud(); 
+                    } 
+                }));
             }
         }
 
@@ -969,23 +1068,23 @@
         window.toggleAdminMode = function() { isEditing = !isEditing; window.render(); }; window.toggleDarkMode = function() { document.documentElement.classList.toggle('dark'); localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light'); window.render(); };
 
         function setModalVis(t) {
-            const mg = document.getElementById('modal-grid'), ft = document.getElementById('field-title'), fu = document.getElementById('field-url'), fi = document.getElementById('field-image'), fc = document.getElementById('field-category'), fp = document.getElementById('field-preview'), fz = document.getElementById('field-zoom'), fb = document.getElementById('modal-save-btn'), fh = document.getElementById('app-icon-help-text'), fht = document.getElementById('field-header-type'), fhc = document.getElementById('field-header-colors'), fhi = document.getElementById('field-header-image'), fhtc = document.getElementById('field-header-text-colors'), fhls = document.getElementById('field-header-link-settings'), flb = document.getElementById('field-link-bg'), fle = document.getElementById('field-link-event');
-            [ft, fu, fi, fc, fp, fz, fht, fhc, fhi, fhtc, fhls, flb, fle].forEach(el => el && el.classList.remove('hidden')); if (fh) fh.classList.add('hidden');
+            const mg = document.getElementById('modal-grid'), ft = document.getElementById('field-title'), fu = document.getElementById('field-url'), fi = document.getElementById('field-image'), fc = document.getElementById('field-category'), fp = document.getElementById('field-preview'), fz = document.getElementById('field-zoom'), fb = document.getElementById('modal-save-btn'), fh = document.getElementById('app-icon-help-text'), fht = document.getElementById('field-header-type'), fhc = document.getElementById('field-header-colors'), fhi = document.getElementById('field-header-image'), fhtc = document.getElementById('field-header-text-colors'), fhls = document.getElementById('field-header-link-settings'), flb = document.getElementById('field-link-bg'), fle = document.getElementById('field-link-event'), flm = document.getElementById('field-link-master');
+            [ft, fu, fi, fc, fp, fz, fht, fhc, fhi, fhtc, fhls, flb, fle, flm].forEach(el => el && el.classList.remove('hidden')); if (fh) fh.classList.add('hidden');
             mg.classList.add('md:grid-cols-2'); mg.classList.remove('grid-cols-1'); fb.classList.replace('w-auto', 'w-full');
             const pbox = document.getElementById('preview-box'); pbox.className = 'w-40 h-40 md:w-48 md:h-48 bg-slate-100 dark:bg-slate-800 rounded-[2rem] overflow-hidden relative border-[6px] border-slate-200 dark:border-slate-700 shadow-xl cursor-move active:cursor-grabbing'; pbox.style.webkitMaskImage = '-webkit-radial-gradient(white, black)'; pbox.style.maskImage = 'radial-gradient(white, black)';
-            if (t === 'category') { mg.classList.remove('md:grid-cols-2'); mg.classList.add('grid-cols-1'); [fu, fi, fc, fp, fz, fht, fhc, fhi, fhtc, fhls, flb, fle].forEach(el => el && el.classList.add('hidden')); fb.classList.replace('w-full', 'w-auto'); }
-            else if (t === 'link') [fht, fhc, fhi, fhtc, fhls].forEach(el => el && el.classList.add('hidden'));
-            else if (t === 'header') { [fc, fht, fhc, fhi, flb, fle].forEach(el => el && el.classList.add('hidden')); if(fhtc){fhtc.classList.add('flex');fhtc.classList.remove('hidden');} if(fhls){fhls.classList.add('flex');fhls.classList.remove('hidden');} }
-            else if (t === 'app-icon') { [ft, fu, fc, fht, fhc, fhi, fhtc, fhls, flb, fle].forEach(el => el && el.classList.add('hidden')); if(fh) fh.classList.remove('hidden'); }
-            else if (t === 'header-design') { [ft, fu, fc, fi, flb, fle].forEach(el => el && el.classList.add('hidden')); if(fhtc){fhtc.classList.add('flex');fhtc.classList.remove('hidden');} if(fhls){fhls.classList.add('flex');fhls.classList.remove('hidden');} pbox.className = 'w-full h-24 bg-slate-100 rounded-xl overflow-hidden relative border-[6px] border-slate-200 shadow-xl cursor-move'; pbox.style.webkitMaskImage = 'none'; pbox.style.maskImage = 'none'; }
+            if (t === 'category') { mg.classList.remove('md:grid-cols-2'); mg.classList.add('grid-cols-1'); [fu, fi, fc, fp, fz, fht, fhc, fhi, fhtc, fhls, flb, fle, flm].forEach(el => el && el.classList.add('hidden')); fb.classList.replace('w-full', 'w-auto'); }
+            else if (t === 'link') { [fht, fhc, fhi, fhtc, fhls].forEach(el => el && el.classList.add('hidden')); if(flm){flm.classList.add('flex');flm.classList.remove('hidden');} }
+            else if (t === 'header') { [fc, fht, fhc, fhi, flb, fle, flm].forEach(el => el && el.classList.add('hidden')); if(fhtc){fhtc.classList.add('flex');fhtc.classList.remove('hidden');} if(fhls){fhls.classList.add('flex');fhls.classList.remove('hidden');} }
+            else if (t === 'app-icon') { [ft, fu, fc, fht, fhc, fhi, fhtc, fhls, flb, fle, flm].forEach(el => el && el.classList.add('hidden')); if(fh) fh.classList.remove('hidden'); }
+            else if (t === 'header-design') { [ft, fu, fc, fi, flb, fle, flm].forEach(el => el && el.classList.add('hidden')); if(fhtc){fhtc.classList.add('flex');fhtc.classList.remove('hidden');} if(fhls){fhls.classList.add('flex');fhls.classList.remove('hidden');} pbox.className = 'w-full h-24 bg-slate-100 rounded-xl overflow-hidden relative border-[6px] border-slate-200 shadow-xl cursor-move'; pbox.style.webkitMaskImage = 'none'; pbox.style.maskImage = 'none'; }
         }
         window.toggleLinkType = function() { const t = document.getElementById('input-link-type').value; if(t==='internal'){document.getElementById('input-url').classList.add('hidden');document.getElementById('input-internal-target').classList.remove('hidden');}else{document.getElementById('input-url').classList.remove('hidden');document.getElementById('input-internal-target').classList.add('hidden');} };
         
         window.openHeaderModal = function() { currentEditId = 'header'; currentEditType = 'header'; document.getElementById('modal-title').innerText = "Identity Settings"; document.getElementById('label-url').innerText = "Subtitle"; document.getElementById('label-image').innerText = "Main Logo URL"; document.getElementById('input-title').value = settings.title || ''; document.getElementById('input-url').value = settings.subtitle || ''; document.getElementById('input-image').value = settings.logo || ''; document.getElementById('input-zoom').value = settings.zoom || 1; document.getElementById('input-override-colors').checked = !!settings.overrideColors; document.getElementById('color-pickers-wrapper').style.display = settings.overrideColors ? 'grid' : 'none'; document.getElementById('input-title-color').value = settings.titleColor || '#1e3a8a'; document.getElementById('input-subtitle-color').value = settings.subtitleColor || '#64748b'; document.getElementById('input-show-header-link').checked = settings.showHeaderLink !== false; document.getElementById('input-header-link-text').value = settings.headerLinkText || 'my.scouting.org'; document.getElementById('input-header-link-url').value = settings.headerLinkUrl || 'https://my.scouting.org'; document.getElementById('input-link-type').parentElement.classList.add('hidden'); document.getElementById('input-url').classList.remove('hidden'); document.getElementById('input-internal-target').classList.add('hidden'); setModalVis('header'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.openAppIconModal = function() { currentEditId = 'app-icon'; currentEditType = 'app-icon'; document.getElementById('modal-title').innerText = "Browser Tab & App Icon"; document.getElementById('label-image').innerText = "Icon URL"; document.getElementById('input-image').value = settings.tabIconUrl || ''; document.getElementById('input-zoom').value = settings.tabIconZoom || 1; setModalVis('app-icon'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.openHeaderDesignModal = function() { currentEditId = 'header-design'; currentEditType = 'header-design'; document.getElementById('modal-title').innerText = "Header Background"; document.getElementById('input-header-bg-type').value = settings.headerBgType || 'default'; document.getElementById('input-header-bg-color').value = settings.headerBgColor || '#ffffff'; document.getElementById('input-header-border-color').value = settings.headerBorderColor || '#facc15'; document.getElementById('input-header-bg-image').value = settings.headerBgImage || ''; document.getElementById('input-zoom').value = settings.headerBgZoom || 1; document.getElementById('input-override-colors').checked = !!settings.overrideColors; document.getElementById('color-pickers-wrapper').style.display = settings.overrideColors ? 'grid' : 'none'; document.getElementById('input-title-color').value = settings.titleColor || '#1e3a8a'; document.getElementById('input-subtitle-color').value = settings.subtitleColor || '#64748b'; document.getElementById('input-show-header-link').checked = settings.showHeaderLink !== false; document.getElementById('input-header-link-text').value = settings.headerLinkText || 'my.scouting.org'; document.getElementById('input-header-link-url').value = settings.headerLinkUrl || 'https://my.scouting.org'; setModalVis('header-design'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
-        window.editLink = function(id) { currentEditId = id; currentEditType = 'link'; const link = links.find(l => l.id === id); document.getElementById('modal-title').innerText = "Tile Settings"; document.getElementById('label-url').innerText = "Target / URL"; document.getElementById('label-image').innerText = "Image URL"; document.getElementById('input-title').value = link.title; document.getElementById('input-image').value = link.img; document.getElementById('input-zoom').value = link.zoom || 1; document.getElementById('input-link-custom-bg-enable').checked = !!link.customBg; document.getElementById('input-link-bg').disabled = !link.customBg; document.getElementById('input-link-bg').value = link.bgColor || '#ffffff'; document.getElementById('input-link-is-event').checked = !!link.isEvent; document.getElementById('link-event-date-wrapper').style.display = link.isEvent ? 'block' : 'none'; document.getElementById('input-link-event-date').value = link.eventDate || ''; document.getElementById('input-link-type').parentElement.classList.remove('hidden'); const intTarget = document.getElementById('input-internal-target'); intTarget.innerHTML = '<option value="#volunteer">Volunteer Positions</option><option value="#trivia">Trivia Categories</option><option value="#timeline">Pack Timeline</option>'; trivia.forEach(cat => { const opt = document.createElement('option'); opt.value = '#play-trivia-' + cat.id; opt.innerText = 'Trivia: ' + cat.title; intTarget.appendChild(opt); }); const isInt = link.url && link.url.startsWith('#'); document.getElementById('input-link-type').value = isInt ? 'internal' : 'external'; if(isInt) intTarget.value = link.url; else document.getElementById('input-url').value = link.url; window.toggleLinkType(); const sel = document.getElementById('input-category'); sel.innerHTML = ''; categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat.id; opt.innerText = cat.title; if (cat.id === link.categoryId) opt.selected = true; sel.appendChild(opt); }); setModalVis('link'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
-        window.addNewLink = function(cid) { const id = Date.now(); links.push({ id, title: 'New Link', url: '', img: '', zoom: 1, x: 0, y: 0, categoryId: cid, customBg: false, bgColor: '#ffffff', isEvent: false, eventDate: '' }); window.editLink(id); };
+        window.editLink = function(id) { currentEditId = id; currentEditType = 'link'; const link = links.find(l => l.id === id); document.getElementById('modal-title').innerText = "Tile Settings"; document.getElementById('label-url').innerText = "Target / URL"; document.getElementById('label-image').innerText = "Image URL"; document.getElementById('input-title').value = link.title; document.getElementById('input-image').value = link.img; document.getElementById('input-zoom').value = link.zoom || 1; document.getElementById('input-link-custom-bg-enable').checked = !!link.customBg; document.getElementById('input-link-bg').disabled = !link.customBg; document.getElementById('input-link-bg').value = link.bgColor || '#ffffff'; document.getElementById('input-link-is-event').checked = !!link.isEvent; document.getElementById('link-event-date-wrapper').style.display = link.isEvent ? 'block' : 'none'; document.getElementById('input-link-event-date').value = link.eventDate || ''; document.getElementById('input-link-is-master').checked = !!link.isMasterTile; document.getElementById('input-link-type').parentElement.classList.remove('hidden'); const intTarget = document.getElementById('input-internal-target'); intTarget.innerHTML = '<option value="#volunteer">Volunteer Positions</option><option value="#trivia">Trivia Categories</option><option value="#timeline">Pack Timeline</option>'; trivia.forEach(cat => { const opt = document.createElement('option'); opt.value = '#play-trivia-' + cat.id; opt.innerText = 'Trivia: ' + cat.title; intTarget.appendChild(opt); }); const isInt = link.url && link.url.startsWith('#'); document.getElementById('input-link-type').value = isInt ? 'internal' : 'external'; if(isInt) intTarget.value = link.url; else document.getElementById('input-url').value = link.url; window.toggleLinkType(); const sel = document.getElementById('input-category'); sel.innerHTML = ''; categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat.id; opt.innerText = cat.title; if (cat.id === link.categoryId) opt.selected = true; sel.appendChild(opt); }); setModalVis('link'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
+        window.addNewLink = function(cid) { const id = Date.now(); links.push({ id, title: 'New Link', url: '', img: '', zoom: 1, x: 0, y: 0, categoryId: cid, customBg: false, bgColor: '#ffffff', isEvent: false, eventDate: '', isMasterTile: false }); window.editLink(id); };
         window.deleteLink = function(id) { if (confirm("Remove tile?")) { links = links.filter(l => l.id !== id); window.render(); if(useFirebase) window.syncToCloud(); } };
         window.editCategory = function(id) { currentEditId = id; currentEditType = 'category'; document.getElementById('modal-title').innerText = "Category Name"; document.getElementById('input-title').value = categories.find(c => c.id === id).title; setModalVis('category'); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); }
         window.addNewCategory = function() { const id = 'cat_' + Date.now(); categories.push({ id, title: 'New Category' }); window.editCategory(id); }
@@ -1015,7 +1114,7 @@
             else if (currentEditType === 'app-icon') { settings.tabIconUrl = document.getElementById('input-image').value; settings.tabIconZoom = parseFloat(document.getElementById('input-zoom').value) || 1; }
             else if (currentEditType === 'header-design') { settings.headerBgType = document.getElementById('input-header-bg-type').value; settings.headerBgColor = document.getElementById('input-header-bg-color').value; settings.headerBorderColor = document.getElementById('input-header-border-color').value; settings.headerBgImage = document.getElementById('input-header-bg-image').value; settings.headerBgZoom = parseFloat(document.getElementById('input-zoom').value) || 1; settings.overrideColors = document.getElementById('input-override-colors').checked; settings.titleColor = document.getElementById('input-title-color').value; settings.subtitleColor = document.getElementById('input-subtitle-color').value; settings.showHeaderLink = document.getElementById('input-show-header-link').checked; settings.headerLinkText = document.getElementById('input-header-link-text').value; settings.headerLinkUrl = document.getElementById('input-header-link-url').value; }
             else if (currentEditType === 'category') { const cat = categories.find(c => c.id === currentEditId); if (cat) cat.title = document.getElementById('input-title').value || 'Unnamed Category'; }
-            else if (currentEditType === 'link') { const link = links.find(l => l.id === currentEditId); if (link) { link.title = document.getElementById('input-title').value; let t = document.getElementById('input-link-type').value; let su = t === 'internal' ? document.getElementById('input-internal-target').value : document.getElementById('input-url').value.trim(); if (su && !su.startsWith('http') && !su.startsWith('#')) su = 'https://' + su; link.url = su; link.categoryId = document.getElementById('input-category').value; link.img = document.getElementById('input-image').value; link.zoom = document.getElementById('input-zoom').value; link.customBg = document.getElementById('input-link-custom-bg-enable').checked; link.bgColor = document.getElementById('input-link-bg').value; link.isEvent = document.getElementById('input-link-is-event').checked; link.eventDate = document.getElementById('input-link-event-date').value; } }
+            else if (currentEditType === 'link') { const link = links.find(l => l.id === currentEditId); if (link) { link.title = document.getElementById('input-title').value; let t = document.getElementById('input-link-type').value; let su = t === 'internal' ? document.getElementById('input-internal-target').value : document.getElementById('input-url').value.trim(); if (su && !su.startsWith('http') && !su.startsWith('#')) su = 'https://' + su; link.url = su; link.categoryId = document.getElementById('input-category').value; link.img = document.getElementById('input-image').value; link.zoom = document.getElementById('input-zoom').value; link.customBg = document.getElementById('input-link-custom-bg-enable').checked; link.bgColor = document.getElementById('input-link-bg').value; link.isEvent = document.getElementById('input-link-is-event').checked; link.eventDate = document.getElementById('input-link-event-date').value; link.isMasterTile = document.getElementById('input-link-is-master').checked; } }
             window.closeModal(); window.render(); if (useFirebase) window.syncToCloud();
         };
 
