@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -104,6 +104,7 @@
                     <button onclick="window.switchView('links')" id="tab-links" class="px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm">Resources</button>
                     <button onclick="window.switchView('volunteer')" id="tab-volunteer" class="px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm">Positions</button>
                     <button onclick="window.switchView('trivia')" id="tab-trivia" class="px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm">Trivia</button>
+                    <button onclick="window.switchView('timeline')" id="tab-timeline" class="px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm">Timeline</button>
                 </div>
             </div>
         </header>
@@ -161,6 +162,7 @@
                         <select id="input-internal-target" class="w-full p-2.5 sm:p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm sm:text-base outline-none dark:text-white font-bold transition-all hidden cursor-pointer">
                             <option value="#volunteer">Volunteer Positions</option>
                             <option value="#trivia">Trivia Categories</option>
+                            <option value="#timeline">Pack Timeline</option>
                         </select>
                     </div>
                     <div id="field-category" class="hidden">
@@ -287,6 +289,39 @@
         </div>
     </div>
 
+    <!-- Timeline Config Modal -->
+    <div id="timeline-config-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-600 my-auto">
+            <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
+                <h3 class="text-lg font-black uppercase tracking-widest flex items-center gap-2"><i data-lucide="settings" class="w-5 h-5 text-blue-400"></i> Timeline Settings</h3>
+                <button onclick="window.closeTimelineConfigModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 md:p-8 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Start Year</label><input id="tl-start-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                    <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">End Year</label><input id="tl-end-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                </div>
+                <div class="flex justify-end mt-4"><button onclick="window.saveTimelineConfig()" class="w-full px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-blue-700 transition-colors">Save Settings</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline Entry Modal -->
+    <div id="timeline-entry-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-600 my-auto">
+            <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
+                <h3 class="text-lg font-black uppercase tracking-widest flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-blue-400"></i> Edit Event</h3>
+                <button onclick="window.closeTimelineEntryModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="p-5 sm:p-6 md:p-8 space-y-4">
+                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Year *</label><input id="tl-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Event Title *</label><input id="tl-title" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Description</label><textarea id="tl-desc" rows="3" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white resize-none" oninput="window.autoResizeTextarea(this)"></textarea></div>
+                <div class="flex justify-end mt-4"><button onclick="window.saveTimelineEntry()" class="w-full px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-blue-700 transition-colors">Save Event</button></div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -312,6 +347,10 @@
         let settings = { ...defaultSettings, ...(JSON.parse(localStorage.getItem('scout_settings')) || {}) };
         let volunteers = JSON.parse(localStorage.getItem('scout_volunteers')) || [];
         let trivia = JSON.parse(localStorage.getItem('scout_trivia')) || [];
+        
+        // Timeline Data
+        let timelineConfig = JSON.parse(localStorage.getItem('scout_timeline_config')) || { startYear: 1910, endYear: new Date().getFullYear() + 10 };
+        let timeline = JSON.parse(localStorage.getItem('scout_timeline')) || [];
 
         let currentEditId = null; let currentEditType = null;
         let isDragging = false; let startX, startY;
@@ -319,7 +358,7 @@
         // Trivia State
         let activeTriviaCatId = null;
         let activeTriviaQIndex = 0;
-        let activeTriviaAnswers = {}; // e.g. { 0: 2 } meaning question index 0, they selected option index 2
+        let activeTriviaAnswers = {};
 
         window.showToast = function(msg, isErr = false) {
             const container = document.getElementById('toast-container'); const toast = document.createElement('div');
@@ -354,6 +393,8 @@
                                 if (data.categories) categories = data.categories; if (data.links) links = data.links; if (data.settings) settings = { ...defaultSettings, ...data.settings };
                                 if (data.volunteers) volunteers = data.volunteers;
                                 if (data.trivia) trivia = data.trivia;
+                                if (data.timeline) timeline = data.timeline;
+                                if (data.timelineConfig) timelineConfig = data.timelineConfig;
                                 window.render();
                             } else { window.syncToCloud(); }
                         }, (error) => {
@@ -370,7 +411,7 @@
             try {
                 localUpdatedAt = Date.now(); localStorage.setItem('scout_updatedAt', localUpdatedAt.toString());
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'packData', 'config');
-                await setDoc(docRef, JSON.parse(JSON.stringify({ links, settings, categories, volunteers, trivia, updatedAt: localUpdatedAt })));
+                await setDoc(docRef, JSON.parse(JSON.stringify({ links, settings, categories, volunteers, trivia, timeline, timelineConfig, updatedAt: localUpdatedAt })));
             } catch (error) { 
                 console.error("Firebase Sync Error: ", error); 
                 window.showToast("Cloud Sync Failed", true); 
@@ -417,14 +458,13 @@
             // Hide/show leader nav based on admin status
             if (isAdmin || isLeader) {
                 leaderNav.classList.remove('hidden');
-                ['links', 'volunteer', 'trivia'].forEach(tab => {
+                ['links', 'volunteer', 'trivia', 'timeline'].forEach(tab => {
                     const el = document.getElementById(`tab-${tab}`);
                     if(el) el.className = `px-3 md:px-4 py-1.5 md:py-2 rounded-full font-bold uppercase tracking-widest text-[9px] md:text-[10px] transition-colors shadow-sm ${currentView.startsWith(tab) ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`;
                 });
             } else {
                 leaderNav.classList.add('hidden');
-                // Make sure users don't get booted out of playing trivia if they clicked a tile
-                if (currentView !== 'links' && !currentView.startsWith('trivia-play')) {
+                if (currentView !== 'links' && !currentView.startsWith('trivia-play') && currentView !== 'timeline') {
                     currentView = 'links';
                 }
             }
@@ -436,6 +476,7 @@
             else if (currentView === 'trivia') window.renderTriviaView(container);
             else if (currentView === 'trivia-manage') window.renderTriviaManageView(container);
             else if (currentView === 'trivia-play') window.renderTriviaPlayView(container);
+            else if (currentView === 'timeline') window.renderTimelineView(container);
             else window.renderLinksView(container);
 
             document.getElementById('theme-btn').innerHTML = document.documentElement.classList.contains('dark') ? '<i data-lucide="sun" class="w-4 h-4"></i>' : '<i data-lucide="moon" class="w-4 h-4"></i>';
@@ -446,11 +487,11 @@
             lockBtn.innerHTML = isAdmin || isLeader ? '<i data-lucide="unlock" class="text-blue-900 w-5 h-5"></i>' : '<i data-lucide="lock" class="text-white w-5 h-5"></i>';
 
             const adminBtn = document.getElementById('admin-toggle-btn');
-            if (isAdmin && (currentView === 'links' || currentView.startsWith('trivia'))) {
+            if (isAdmin && (currentView === 'links' || currentView.startsWith('trivia') || currentView === 'timeline')) {
                 adminBtn.classList.remove('hidden');
                 if (isEditing) { adminBtn.innerHTML = '<i data-lucide="settings" class="w-4 h-4 text-blue-900"></i><span class="text-[10px]">Finish Editing</span>'; adminBtn.className = "flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-yellow-400 text-blue-900 font-bold uppercase tracking-widest shadow-lg"; if(currentView === 'links') { document.getElementById('app-icon-edit-btn').classList.replace('hidden', 'flex'); document.getElementById('header-design-btn').classList.replace('hidden', 'flex'); } }
                 else { adminBtn.innerHTML = '<i data-lucide="settings" class="w-4 h-4"></i><span class="text-[10px]">Edit Page</span>'; adminBtn.className = "flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-600 font-bold uppercase tracking-widest shadow-lg"; document.getElementById('app-icon-edit-btn').classList.replace('flex', 'hidden'); document.getElementById('header-design-btn').classList.replace('flex', 'hidden'); }
-            } else { adminBtn.classList.add('hidden'); document.getElementById('app-icon-edit-btn').classList.replace('flex', 'hidden'); document.getElementById('header-design-btn').classList.replace('flex', 'hidden'); if(currentView !== 'links' && !currentView.startsWith('trivia')) isEditing = false; }
+            } else { adminBtn.classList.add('hidden'); document.getElementById('app-icon-edit-btn').classList.replace('flex', 'hidden'); document.getElementById('header-design-btn').classList.replace('flex', 'hidden'); if(currentView !== 'links' && !currentView.startsWith('trivia') && currentView !== 'timeline') isEditing = false; }
 
             const headerBtn = document.getElementById('edit-header-btn'); const textBtn = document.getElementById('edit-text-btn');
             if (isAdmin && isEditing && currentView === 'links') { headerBtn.classList.remove('hidden'); headerBtn.innerHTML = '<i data-lucide="edit-3" class="w-5 h-5"></i>'; if (textBtn) { textBtn.classList.remove('hidden'); textBtn.innerHTML = '<i data-lucide="edit-3" class="w-5 h-5"></i>'; } } 
@@ -463,6 +504,8 @@
             localStorage.setItem('scout_categories', JSON.stringify(categories));
             localStorage.setItem('scout_volunteers', JSON.stringify(volunteers));
             localStorage.setItem('scout_trivia', JSON.stringify(trivia));
+            localStorage.setItem('scout_timeline', JSON.stringify(timeline));
+            localStorage.setItem('scout_timeline_config', JSON.stringify(timelineConfig));
             localStorage.setItem('scout_updatedAt', localUpdatedAt.toString());
         };
 
@@ -474,6 +517,123 @@
         window.handleInternalLink = function(url) {
             if (url.startsWith('#play-trivia-')) window.playTrivia(url.replace('#play-trivia-', ''));
             else window.switchView(url.substring(1));
+        };
+        
+        /* --- Timeline Functions --- */
+        window.renderTimelineView = function(container) {
+            const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-5xl flex flex-col gap-4 relative pb-20';
+            
+            let headerHtml = `<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"><h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-3"><i data-lucide="clock" class="w-6 h-6 text-blue-600"></i> Pack Timeline</h2>`;
+            if (isAdmin && isEditing) {
+                headerHtml += `<div class="flex gap-2"><button onclick="window.openTimelineConfigModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="settings" class="w-3 h-3"></i> Config</button><button onclick="window.openTimelineEntryModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="plus" class="w-3 h-3"></i> Add Event</button></div>`;
+            }
+            headerHtml += `</div>`;
+            wrapper.innerHTML = headerHtml;
+
+            const timelineContainer = document.createElement('div');
+            timelineContainer.className = 'relative w-full py-6 md:py-10';
+            // Center line
+            timelineContainer.innerHTML += `<div class="absolute left-[24px] md:left-1/2 top-0 bottom-0 w-[4px] bg-blue-200 dark:bg-blue-900/50 md:-translate-x-[2px] rounded-full z-0"></div>`;
+
+            let items = [];
+            let startDecade = Math.ceil(timelineConfig.startYear / 10) * 10;
+            for (let y = startDecade; y <= timelineConfig.endYear; y += 10) {
+                items.push({ type: 'tick', year: y });
+            }
+            timeline.forEach(t => items.push({ type: 'event', year: parseInt(t.year), data: t }));
+            items.sort((a, b) => a.year - b.year || (a.type === 'tick' ? -1 : 1));
+
+            let isLeft = true;
+            const listWrapper = document.createElement('div');
+            listWrapper.className = 'flex flex-col gap-0 relative z-10';
+
+            items.forEach((item) => {
+                if (item.type === 'tick') {
+                    listWrapper.innerHTML += `<div class="flex justify-start md:justify-center w-full my-6 pl-[8px] md:pl-0 relative z-10"><div class="bg-yellow-400 text-blue-900 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-md border-4 border-white dark:border-slate-900 whitespace-nowrap">${item.year}</div></div>`;
+                } else {
+                    const ev = item.data;
+                    const alignmentClass = isLeft ? 'md:pr-[40px] md:text-right md:justify-end' : 'md:ml-auto md:pl-[40px] md:justify-start';
+                    const dotClass = isLeft ? 'left-[14px] md:left-auto md:-right-[10px]' : 'left-[14px] md:-left-[10px]';
+                    
+                    let adminControls = '';
+                    if (isAdmin && isEditing) {
+                        adminControls = `<div class="absolute -top-3 ${isLeft ? 'md:-left-3 right-3' : '-right-3'} z-20 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"><button onclick="window.openTimelineEntryModal('${ev.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 text-blue-600 hover:text-blue-400 rounded-lg shadow-sm transition-colors"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="window.deleteTimelineEntry('${ev.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 text-red-500 hover:text-red-400 rounded-lg shadow-sm transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`;
+                    }
+
+                    listWrapper.innerHTML += `
+                        <div class="flex w-full md:w-1/2 pl-[60px] md:pl-0 my-4 relative group ${alignmentClass}">
+                            <div class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-blue-500 border-4 border-white dark:border-slate-900 z-10 shadow-sm ${dotClass}"></div>
+                            <div class="w-full max-w-lg bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 relative hover:-translate-y-1 transition-transform">
+                                ${adminControls}
+                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 block">${ev.year}</span>
+                                <h4 class="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug mb-2">${ev.title}</h4>
+                                ${ev.description ? `<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">${ev.description}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    isLeft = !isLeft;
+                }
+            });
+
+            if (items.length === 0) {
+                timelineContainer.innerHTML = `<div class="text-center py-20 opacity-50 font-bold uppercase tracking-widest text-sm text-slate-500 relative z-10"><i data-lucide="clock" class="w-16 h-16 mx-auto mb-4 opacity-50"></i> No Timeline Events.</div>`;
+            } else {
+                timelineContainer.appendChild(listWrapper);
+            }
+            
+            wrapper.appendChild(timelineContainer);
+            container.appendChild(wrapper);
+        };
+
+        window.openTimelineConfigModal = function() {
+            document.getElementById('tl-start-year').value = timelineConfig.startYear;
+            document.getElementById('tl-end-year').value = timelineConfig.endYear;
+            document.getElementById('timeline-config-modal').classList.replace('hidden', 'flex');
+        };
+        window.closeTimelineConfigModal = () => document.getElementById('timeline-config-modal').classList.replace('flex', 'hidden');
+        window.saveTimelineConfig = function() {
+            const sy = parseInt(document.getElementById('tl-start-year').value);
+            const ey = parseInt(document.getElementById('tl-end-year').value);
+            if (!isNaN(sy) && !isNaN(ey) && sy <= ey) {
+                timelineConfig.startYear = sy;
+                timelineConfig.endYear = ey;
+                window.closeTimelineConfigModal();
+                window.render();
+                if (useFirebase) window.syncToCloud();
+            } else {
+                window.showToast('Invalid years provided', true);
+            }
+        };
+
+        window.openTimelineEntryModal = function(id = null) {
+            currentEditId = id;
+            const ev = id ? timeline.find(t => t.id === id) : null;
+            document.getElementById('tl-year').value = ev ? ev.year : new Date().getFullYear();
+            document.getElementById('tl-title').value = ev ? ev.title : '';
+            document.getElementById('tl-desc').value = ev ? ev.description : '';
+            document.getElementById('timeline-entry-modal').classList.replace('hidden', 'flex');
+            setTimeout(() => window.autoResizeTextarea(document.getElementById('tl-desc')), 10);
+        };
+        window.closeTimelineEntryModal = () => document.getElementById('timeline-entry-modal').classList.replace('flex', 'hidden');
+        window.saveTimelineEntry = function() {
+            const year = parseInt(document.getElementById('tl-year').value);
+            const title = document.getElementById('tl-title').value.trim();
+            const desc = document.getElementById('tl-desc').value.trim();
+            if (!title || isNaN(year)) return window.showToast('Year and Title required', true);
+            
+            if (currentEditId) {
+                const ev = timeline.find(t => t.id === currentEditId);
+                if (ev) { ev.year = year; ev.title = title; ev.description = desc; }
+            } else {
+                timeline.push({ id: 'tl_' + Date.now(), year, title, description: desc });
+            }
+            window.closeTimelineEntryModal(); window.render(); if (useFirebase) window.syncToCloud();
+        };
+        window.deleteTimelineEntry = function(id) {
+            if (confirm("Delete this timeline event?")) {
+                timeline = timeline.filter(t => t.id !== id);
+                window.render(); if (useFirebase) window.syncToCloud();
+            }
         };
 
         /* --- Trivia Functions --- */
@@ -704,7 +864,7 @@
             // Options (Condensed gap and padding)
             html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mt-2">`;
             q.options.forEach((opt, idx) => {
-                let btnClass = 'trivia-btn w-full p-3 md:p-4 bg-white dark:bg-slate-800 rounded-xl shadow-md border-2 border-slate-100 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-base md:text-lg text-center leading-snug cursor-pointer';
+                let btnClass = 'trivia-btn w-full p-3 md:p-4 bg-white dark:bg-slate-800 rounded-xl shadow-md border-2 border-slate-100 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-base md:text-lg text-center leading-snug cursor-pointer focus:outline-none focus:ring-0';
                 
                 if (isAnswered) {
                     btnClass += ' cursor-default';
@@ -716,7 +876,7 @@
                         btnClass += ' trivia-dimmed';
                     }
                 } else {
-                    btnClass += ' hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-slate-700';
+                    btnClass += ' hover:bg-purple-50 dark:hover:bg-slate-700';
                 }
 
                 html += `<button class="${btnClass}" ${isAnswered ? 'disabled' : `onclick="window.answerTrivia(${idx})"`}>${opt}</button>`;
@@ -824,7 +984,7 @@
         window.openHeaderModal = function() { currentEditId = 'header'; currentEditType = 'header'; document.getElementById('modal-title').innerText = "Identity Settings"; document.getElementById('label-url').innerText = "Subtitle"; document.getElementById('label-image').innerText = "Main Logo URL"; document.getElementById('input-title').value = settings.title || ''; document.getElementById('input-url').value = settings.subtitle || ''; document.getElementById('input-image').value = settings.logo || ''; document.getElementById('input-zoom').value = settings.zoom || 1; document.getElementById('input-override-colors').checked = !!settings.overrideColors; document.getElementById('color-pickers-wrapper').style.display = settings.overrideColors ? 'grid' : 'none'; document.getElementById('input-title-color').value = settings.titleColor || '#1e3a8a'; document.getElementById('input-subtitle-color').value = settings.subtitleColor || '#64748b'; document.getElementById('input-show-header-link').checked = settings.showHeaderLink !== false; document.getElementById('input-header-link-text').value = settings.headerLinkText || 'my.scouting.org'; document.getElementById('input-header-link-url').value = settings.headerLinkUrl || 'https://my.scouting.org'; document.getElementById('input-link-type').parentElement.classList.add('hidden'); document.getElementById('input-url').classList.remove('hidden'); document.getElementById('input-internal-target').classList.add('hidden'); setModalVis('header'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.openAppIconModal = function() { currentEditId = 'app-icon'; currentEditType = 'app-icon'; document.getElementById('modal-title').innerText = "Browser Tab & App Icon"; document.getElementById('label-image').innerText = "Icon URL"; document.getElementById('input-image').value = settings.tabIconUrl || ''; document.getElementById('input-zoom').value = settings.tabIconZoom || 1; setModalVis('app-icon'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.openHeaderDesignModal = function() { currentEditId = 'header-design'; currentEditType = 'header-design'; document.getElementById('modal-title').innerText = "Header Background"; document.getElementById('input-header-bg-type').value = settings.headerBgType || 'default'; document.getElementById('input-header-bg-color').value = settings.headerBgColor || '#ffffff'; document.getElementById('input-header-border-color').value = settings.headerBorderColor || '#facc15'; document.getElementById('input-header-bg-image').value = settings.headerBgImage || ''; document.getElementById('input-zoom').value = settings.headerBgZoom || 1; document.getElementById('input-override-colors').checked = !!settings.overrideColors; document.getElementById('color-pickers-wrapper').style.display = settings.overrideColors ? 'grid' : 'none'; document.getElementById('input-title-color').value = settings.titleColor || '#1e3a8a'; document.getElementById('input-subtitle-color').value = settings.subtitleColor || '#64748b'; document.getElementById('input-show-header-link').checked = settings.showHeaderLink !== false; document.getElementById('input-header-link-text').value = settings.headerLinkText || 'my.scouting.org'; document.getElementById('input-header-link-url').value = settings.headerLinkUrl || 'https://my.scouting.org'; setModalVis('header-design'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
-        window.editLink = function(id) { currentEditId = id; currentEditType = 'link'; const link = links.find(l => l.id === id); document.getElementById('modal-title').innerText = "Tile Settings"; document.getElementById('label-url').innerText = "Target / URL"; document.getElementById('label-image').innerText = "Image URL"; document.getElementById('input-title').value = link.title; document.getElementById('input-image').value = link.img; document.getElementById('input-zoom').value = link.zoom || 1; document.getElementById('input-link-custom-bg-enable').checked = !!link.customBg; document.getElementById('input-link-bg').disabled = !link.customBg; document.getElementById('input-link-bg').value = link.bgColor || '#ffffff'; document.getElementById('input-link-is-event').checked = !!link.isEvent; document.getElementById('link-event-date-wrapper').style.display = link.isEvent ? 'block' : 'none'; document.getElementById('input-link-event-date').value = link.eventDate || ''; document.getElementById('input-link-type').parentElement.classList.remove('hidden'); const intTarget = document.getElementById('input-internal-target'); intTarget.innerHTML = '<option value="#volunteer">Volunteer Positions</option><option value="#trivia">Trivia Categories (Main Page)</option>'; trivia.forEach(cat => { const opt = document.createElement('option'); opt.value = '#play-trivia-' + cat.id; opt.innerText = 'Trivia: ' + cat.title; intTarget.appendChild(opt); }); const isInt = link.url && link.url.startsWith('#'); document.getElementById('input-link-type').value = isInt ? 'internal' : 'external'; if(isInt) intTarget.value = link.url; else document.getElementById('input-url').value = link.url; window.toggleLinkType(); const sel = document.getElementById('input-category'); sel.innerHTML = ''; categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat.id; opt.innerText = cat.title; if (cat.id === link.categoryId) opt.selected = true; sel.appendChild(opt); }); setModalVis('link'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
+        window.editLink = function(id) { currentEditId = id; currentEditType = 'link'; const link = links.find(l => l.id === id); document.getElementById('modal-title').innerText = "Tile Settings"; document.getElementById('label-url').innerText = "Target / URL"; document.getElementById('label-image').innerText = "Image URL"; document.getElementById('input-title').value = link.title; document.getElementById('input-image').value = link.img; document.getElementById('input-zoom').value = link.zoom || 1; document.getElementById('input-link-custom-bg-enable').checked = !!link.customBg; document.getElementById('input-link-bg').disabled = !link.customBg; document.getElementById('input-link-bg').value = link.bgColor || '#ffffff'; document.getElementById('input-link-is-event').checked = !!link.isEvent; document.getElementById('link-event-date-wrapper').style.display = link.isEvent ? 'block' : 'none'; document.getElementById('input-link-event-date').value = link.eventDate || ''; document.getElementById('input-link-type').parentElement.classList.remove('hidden'); const intTarget = document.getElementById('input-internal-target'); intTarget.innerHTML = '<option value="#volunteer">Volunteer Positions</option><option value="#trivia">Trivia Categories</option><option value="#timeline">Pack Timeline</option>'; trivia.forEach(cat => { const opt = document.createElement('option'); opt.value = '#play-trivia-' + cat.id; opt.innerText = 'Trivia: ' + cat.title; intTarget.appendChild(opt); }); const isInt = link.url && link.url.startsWith('#'); document.getElementById('input-link-type').value = isInt ? 'internal' : 'external'; if(isInt) intTarget.value = link.url; else document.getElementById('input-url').value = link.url; window.toggleLinkType(); const sel = document.getElementById('input-category'); sel.innerHTML = ''; categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat.id; opt.innerText = cat.title; if (cat.id === link.categoryId) opt.selected = true; sel.appendChild(opt); }); setModalVis('link'); window.updatePreview(); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); };
         window.addNewLink = function(cid) { const id = Date.now(); links.push({ id, title: 'New Link', url: '', img: '', zoom: 1, x: 0, y: 0, categoryId: cid, customBg: false, bgColor: '#ffffff', isEvent: false, eventDate: '' }); window.editLink(id); };
         window.deleteLink = function(id) { if (confirm("Remove tile?")) { links = links.filter(l => l.id !== id); window.render(); if(useFirebase) window.syncToCloud(); } };
         window.editCategory = function(id) { currentEditId = id; currentEditType = 'category'; document.getElementById('modal-title').innerText = "Category Name"; document.getElementById('input-title').value = categories.find(c => c.id === id).title; setModalVis('category'); document.getElementById('modal-overlay').classList.replace('hidden', 'flex'); }
