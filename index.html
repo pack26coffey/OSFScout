@@ -116,7 +116,6 @@
         </div>
     </div>
 
-    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[200] hidden items-center justify-center p-6">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-yellow-400">
             <div class="bg-blue-900 p-5 text-white flex justify-between items-center">
@@ -137,7 +136,6 @@
         </div>
     </div>
 
-    <!-- Main Settings Modal (Links & Branding) -->
     <div id="modal-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[100] hidden items-center justify-center p-4 sm:p-6">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-900">
             <div class="bg-blue-900 p-4 sm:p-5 text-white flex justify-between items-center">
@@ -247,7 +245,6 @@
         </div>
     </div>
 
-    <!-- Volunteer Settings Modal -->
     <div id="volunteer-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-red-600 my-auto">
             <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
@@ -263,7 +260,6 @@
         </div>
     </div>
     
-    <!-- Trivia Category Modal -->
     <div id="trivia-cat-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-purple-600 my-auto">
             <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
@@ -277,7 +273,6 @@
         </div>
     </div>
 
-    <!-- Trivia Question Modal -->
     <div id="trivia-q-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-purple-600 my-auto">
             <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
@@ -289,15 +284,13 @@
                 <div>
                     <label class="text-[10px] font-black uppercase text-slate-400 mb-2 block">Answers & Select Correct Option</label>
                     <div class="space-y-3" id="triv-q-options-container">
-                        <!-- Options generated here by JS -->
-                    </div>
+                        </div>
                 </div>
                 <div class="flex justify-end mt-6"><button onclick="window.saveTriviaQuestion()" class="w-full md:w-auto px-8 py-3.5 bg-purple-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-purple-700 transition-colors">Save Question</button></div>
             </div>
         </div>
     </div>
 
-    <!-- Timeline Config Modal -->
     <div id="timeline-config-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-600 my-auto">
             <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
@@ -318,7 +311,6 @@
         </div>
     </div>
 
-    <!-- Timeline Entry Modal -->
     <div id="timeline-entry-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-600 my-auto">
             <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
@@ -328,9 +320,27 @@
             <div class="p-5 sm:p-6 md:p-8 space-y-4">
                 <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Year *</label><input id="tl-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
                 <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Event Title *</label><input id="tl-title" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Image URL</label><input id="tl-image" type="text" placeholder="https://..." class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white"></div>
                 <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Description</label><textarea id="tl-desc" rows="3" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white resize-none" oninput="window.autoResizeTextarea(this)"></textarea></div>
                 <div class="flex justify-end mt-4"><button onclick="window.saveTimelineEntry()" class="w-full px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-blue-700 transition-colors">Save Event</button></div>
             </div>
+        </div>
+    </div>
+
+    <div id="timeline-slideshow-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl z-[250] hidden items-center justify-center p-4 sm:p-6 select-none cursor-pointer" onclick="window.advanceSlideshow()">
+        <button onclick="window.closeTimelineSlideshow(event)" class="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-[300] focus:outline-none focus:ring-0">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        
+        <div class="w-full max-w-3xl flex flex-col items-center text-center px-4 pointer-events-none modal-animate">
+            <div id="slide-image-container" class="w-full max-h-[45vh] aspect-video bg-slate-900 rounded-2xl overflow-hidden mb-6 shadow-2xl border border-white/10 hidden">
+                <img id="slide-img" src="" class="w-full h-full object-contain">
+            </div>
+            <div class="bg-yellow-400 text-blue-900 px-5 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-md mb-4" id="slide-year">1910</div>
+            <h2 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mb-4 leading-tight" id="slide-title">Event Title</h2>
+            <p class="text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed whitespace-pre-wrap" id="slide-desc">Event description goes here...</p>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8" id="slide-counter">1 of 10</span>
+            <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-2 animate-pulse">Tap anywhere to continue</span>
         </div>
     </div>
 
@@ -371,6 +381,10 @@
         let activeTriviaCatId = null;
         let activeTriviaQIndex = 0;
         let activeTriviaAnswers = {};
+
+        // Slideshow State
+        let slideshowActiveIndex = 0;
+        let sortedTimelineEvents = [];
 
         window.showToast = function(msg, isErr = false) {
             const container = document.getElementById('toast-container'); const toast = document.createElement('div');
@@ -536,15 +550,19 @@
             const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-5xl flex flex-col gap-4 relative pb-20';
             
             let headerHtml = `<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8"><h2 class="text-2xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center gap-3"><i data-lucide="clock" class="w-6 h-6 text-blue-600"></i> ${timelineConfig.pageTitle || 'Pack Timeline'}</h2>`;
-            if (isAdmin && isEditing) {
-                headerHtml += `<div class="flex gap-2"><button onclick="window.openTimelineConfigModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="settings" class="w-3 h-3"></i> Config</button><button onclick="window.openTimelineEntryModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="plus" class="w-3 h-3"></i> Add Event</button></div>`;
+            
+            headerHtml += `<div class="flex items-center gap-2 w-full sm:w-auto">`;
+            if (timeline.length > 0) {
+                headerHtml += `<button onclick="window.openTimelineSlideshow()" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-black uppercase tracking-widest text-[10px] shadow-md transition-all active:scale-95 flex items-center gap-1.5"><i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> View Slideshow</button>`;
             }
-            headerHtml += `</div>`;
+            if (isAdmin && isEditing) {
+                headerHtml += `<button onclick="window.openTimelineConfigModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="settings" class="w-3 h-3"></i> Config</button><button onclick="window.openTimelineEntryModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-sm transition-colors flex items-center gap-1.5"><i data-lucide="plus" class="w-3 h-3"></i> Add Event</button>`;
+            }
+            headerHtml += `</div></div>`;
             wrapper.innerHTML = headerHtml;
 
             const timelineContainer = document.createElement('div');
             timelineContainer.className = 'relative w-full py-6 md:py-10';
-            // Center line
             timelineContainer.innerHTML += `<div class="absolute left-[24px] md:left-1/2 top-0 bottom-0 w-[4px] bg-blue-200 dark:bg-blue-900/50 md:-translate-x-[2px] rounded-full z-0"></div>`;
 
             let items = [];
@@ -572,11 +590,17 @@
                         adminControls = `<div class="absolute -top-3 ${isLeft ? 'md:-left-3 right-3' : '-right-3'} z-20 flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"><button onclick="window.openTimelineEntryModal('${ev.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 text-blue-600 hover:text-blue-400 rounded-lg shadow-sm transition-colors"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button><button onclick="window.deleteTimelineEntry('${ev.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 text-red-500 hover:text-red-400 rounded-lg shadow-sm transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`;
                     }
 
+                    let imgHtml = '';
+                    if (ev.img) {
+                        imgHtml = `<div class="w-full h-48 bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden mb-3 border border-slate-100 dark:border-slate-700 shadow-inner"><img src="${ev.img}" class="w-full h-full object-cover"></div>`;
+                    }
+
                     listWrapper.innerHTML += `
                         <div class="flex w-full md:w-1/2 pl-[60px] md:pl-0 my-4 relative group ${alignmentClass}">
                             <div class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-blue-500 border-4 border-white dark:border-slate-900 z-10 shadow-sm ${dotClass}"></div>
-                            <div class="w-full max-w-lg bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 relative hover:-translate-y-1 transition-transform">
+                            <div class="w-full max-w-lg bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 relative hover:-translate-y-1 transition-transform text-left">
                                 ${adminControls}
+                                ${imgHtml}
                                 <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 block">${ev.year}</span>
                                 <h4 class="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug mb-2">${ev.title}</h4>
                                 ${ev.description ? `<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">${ev.description}</p>` : ''}
@@ -625,6 +649,7 @@
             const ev = id ? timeline.find(t => t.id === id) : null;
             document.getElementById('tl-year').value = ev ? ev.year : new Date().getFullYear();
             document.getElementById('tl-title').value = ev ? ev.title : '';
+            document.getElementById('tl-image').value = ev ? (ev.img || '') : '';
             document.getElementById('tl-desc').value = ev ? ev.description : '';
             document.getElementById('timeline-entry-modal').classList.replace('hidden', 'flex');
             setTimeout(() => window.autoResizeTextarea(document.getElementById('tl-desc')), 10);
@@ -633,14 +658,15 @@
         window.saveTimelineEntry = function() {
             const year = parseInt(document.getElementById('tl-year').value);
             const title = document.getElementById('tl-title').value.trim();
+            const img = document.getElementById('tl-image').value.trim();
             const desc = document.getElementById('tl-desc').value.trim();
             if (!title || isNaN(year)) return window.showToast('Year and Title required', true);
             
             if (currentEditId) {
                 const ev = timeline.find(t => t.id === currentEditId);
-                if (ev) { ev.year = year; ev.title = title; ev.description = desc; }
+                if (ev) { ev.year = year; ev.title = title; ev.img = img; ev.description = desc; }
             } else {
-                timeline.push({ id: 'tl_' + Date.now(), year, title, description: desc });
+                timeline.push({ id: 'tl_' + Date.now(), year, title, img, description: desc });
             }
             window.closeTimelineEntryModal(); window.render(); if (useFirebase) window.syncToCloud();
         };
@@ -648,6 +674,48 @@
             if (confirm("Delete this timeline event?")) {
                 timeline = timeline.filter(t => t.id !== id);
                 window.render(); if (useFirebase) window.syncToCloud();
+            }
+        };
+
+        /* --- Slideshow Functions --- */
+        window.openTimelineSlideshow = function() {
+            sortedTimelineEvents = [...timeline].sort((a, b) => a.year - b.year);
+            if (sortedTimelineEvents.length === 0) return;
+            slideshowActiveIndex = 0;
+            window.updateSlideshowContent();
+            document.getElementById('timeline-slideshow-modal').classList.replace('hidden', 'flex');
+        };
+
+        window.closeTimelineSlideshow = function(event) {
+            if (event) event.stopPropagation();
+            document.getElementById('timeline-slideshow-modal').classList.replace('flex', 'hidden');
+        };
+
+        window.advanceSlideshow = function() {
+            slideshowActiveIndex++;
+            if (slideshowActiveIndex >= sortedTimelineEvents.length) {
+                slideshowActiveIndex = 0; // Wrap around to the start
+            }
+            window.updateSlideshowContent();
+        };
+
+        window.updateSlideshowContent = function() {
+            const ev = sortedTimelineEvents[slideshowActiveIndex];
+            if (!ev) return;
+
+            document.getElementById('slide-year').innerText = ev.year;
+            document.getElementById('slide-title').innerText = ev.title;
+            document.getElementById('slide-desc').innerText = ev.description || '';
+            document.getElementById('slide-counter').innerText = `${slideshowActiveIndex + 1} of ${sortedTimelineEvents.length}`;
+
+            const imgContainer = document.getElementById('slide-image-container');
+            const imgEl = document.getElementById('slide-img');
+            if (ev.img) {
+                imgEl.src = ev.img;
+                imgContainer.classList.remove('hidden');
+            } else {
+                imgContainer.classList.add('hidden');
+                imgEl.src = '';
             }
         };
 
@@ -864,19 +932,15 @@
                 if (cat.questions[qIdx].correctIndex === activeTriviaAnswers[qIdx]) score++;
             });
 
-            // Condensed padding here
             const wrapper = document.createElement('div'); wrapper.className = 'w-full max-w-3xl flex flex-col gap-3 items-center justify-center pt-2 md:pt-4';
             
-            // Header with Score Display
             let html = `<div class="flex justify-between items-center w-full mb-2">`;
             html += `<button onclick="window.switchView('trivia')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-bold text-[10px] uppercase tracking-widest flex items-center gap-1.5 hover:bg-slate-300 transition-colors"><i data-lucide="arrow-left" class="w-3 h-3"></i> Exit</button>`;
             html += `<div class="flex items-center gap-2"><div class="text-[10px] font-black uppercase text-purple-600 dark:text-purple-400 tracking-widest px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-800 flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i> Score: ${score} / ${attempted}</div><button onclick="window.resetTriviaScore()" class="p-1.5 bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full hover:bg-red-200 transition-colors" title="Reset Score"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></button></div>`;
             html += `<div class="text-[10px] font-black uppercase text-slate-500 tracking-widest px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-200 dark:border-slate-700">Q ${activeTriviaQIndex + 1}/${total}</div></div>`;
 
-            // Question (Condensed text size)
             html += `<h2 class="text-lg md:text-2xl font-black text-slate-800 dark:text-slate-100 text-center leading-tight w-full max-w-2xl px-2 mb-2">${q.text}</h2>`;
 
-            // Options (Condensed gap and padding)
             html += `<div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full mt-2">`;
             q.options.forEach((opt, idx) => {
                 let btnClass = 'trivia-btn w-full p-3 md:p-4 bg-white dark:bg-slate-800 rounded-xl shadow-md border-2 border-slate-100 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 text-base md:text-lg text-center leading-snug cursor-pointer focus:outline-none focus:ring-0';
@@ -898,7 +962,6 @@
             });
             html += `</div>`;
 
-            // Controls (Condensed top margin and padding)
             html += `<div class="flex justify-between w-full mt-4 border-t border-slate-200 dark:border-slate-800 pt-4">`;
             html += `<button onclick="window.prevTriviaQ()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl font-bold uppercase tracking-widest text-xs transition-colors ${activeTriviaQIndex === 0 ? 'opacity-0 pointer-events-none' : 'hover:bg-slate-300'}"><i data-lucide="chevron-left" class="w-4 h-4 inline mr-1"></i> Prev</button>`;
             if (activeTriviaQIndex < total - 1) {
@@ -1021,7 +1084,6 @@
             if (isEditing) { const aw = document.createElement('div'); aw.className = 'mt-12 flex justify-center w-full'; aw.innerHTML = `<button onclick="window.addNewCategory()" class="px-8 py-4 bg-white border-4 border-dashed border-slate-300 rounded-[2rem] text-slate-400 font-black uppercase tracking-widest flex items-center gap-3"><i data-lucide="plus-circle" class="w-6 h-6"></i> Add Category</button>`; container.appendChild(aw); }
             
             if (isEditing && window.Sortable) {
-                // Sorting for Master Tiles
                 const mw = document.getElementById('master-tiles-wrapper');
                 if (mw) {
                     new Sortable(mw, {
@@ -1036,10 +1098,8 @@
                     });
                 }
 
-                // Sorting for Categories
                 new Sortable(document.getElementById('category-wrapper'), { animation: 250, handle: '.category-drag-handle', onEnd: function() { categories = Array.from(document.querySelectorAll('.category-section')).map(el => categories.find(c => c.id === el.dataset.id)); if (useFirebase) window.syncToCloud(); } });
                 
-                // Sorting for Regular Links in Categories
                 document.querySelectorAll('.link-grid').forEach(g => new Sortable(g, { 
                     group: 'shared-links', 
                     animation: 250, 
