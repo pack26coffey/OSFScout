@@ -312,17 +312,33 @@
     </div>
 
     <div id="timeline-entry-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[150] hidden items-center justify-center p-4 sm:p-6 overflow-y-auto">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-600 my-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-4xl overflow-hidden flex flex-col shadow-2xl modal-animate border-b-8 border-blue-600 my-auto">
             <div class="bg-slate-800 p-4 sm:p-5 text-white flex justify-between items-center border-b border-slate-700">
                 <h3 class="text-lg font-black uppercase tracking-widest flex items-center gap-2"><i data-lucide="calendar" class="w-5 h-5 text-blue-400"></i> Edit Event</h3>
                 <button onclick="window.closeTimelineEntryModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
-            <div class="p-5 sm:p-6 md:p-8 space-y-4">
-                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Year *</label><input id="tl-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
-                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Event Title *</label><input id="tl-title" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
-                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Image URL</label><input id="tl-image" type="text" placeholder="https://..." class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white"></div>
-                <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Description</label><textarea id="tl-desc" rows="3" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white resize-none" oninput="window.autoResizeTextarea(this)"></textarea></div>
-                <div class="flex justify-end mt-4"><button onclick="window.saveTimelineEntry()" class="w-full px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-blue-700 transition-colors">Save Event</button></div>
+            <div class="p-5 sm:p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Year *</label><input id="tl-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                        <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Exact Date (Optional)</label><input id="tl-exact-date" type="date" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white cursor-pointer"></div>
+                    </div>
+                    <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Event Title *</label><input id="tl-title" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                    <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Image URL</label><input id="tl-image" oninput="window.updateTimelinePreview()" type="text" placeholder="https://..." class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white"></div>
+                    <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Description</label><textarea id="tl-desc" rows="3" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none dark:text-white resize-none" oninput="window.autoResizeTextarea(this)"></textarea></div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div id="tl-preview-box" class="w-full aspect-video bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden relative border-[6px] border-slate-200 dark:border-slate-700 shadow-xl cursor-move active:cursor-grabbing">
+                        <img id="tl-preview-img" src="" class="absolute inset-0 w-full h-full object-contain pointer-events-none" style="transform: translate(0%, 0%) scale(1);">
+                    </div>
+                    <div class="w-full mt-4 space-y-3">
+                        <div class="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest"><span>Zoom</span><span id="tl-zoom-val" class="text-blue-600 font-bold">1.0x</span></div>
+                        <input type="range" id="tl-zoom" oninput="window.updateTimelinePreview()" min="0.5" max="4" step="0.01" value="1">
+                    </div>
+                </div>
+                <div class="col-span-1 md:col-span-2 flex justify-end mt-2">
+                    <button onclick="window.saveTimelineEntry()" class="w-full md:w-auto px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-blue-700 transition-colors">Save Event</button>
+                </div>
             </div>
         </div>
     </div>
@@ -333,8 +349,8 @@
         </button>
         
         <div class="w-full max-w-3xl flex flex-col items-center text-center px-4 pointer-events-none modal-animate">
-            <div id="slide-image-container" class="w-full max-h-[45vh] aspect-video bg-slate-900 rounded-2xl overflow-hidden mb-6 shadow-2xl border border-white/10 hidden">
-                <img id="slide-img" src="" class="w-full h-full object-contain">
+            <div id="slide-image-container" class="w-full max-h-[45vh] aspect-video bg-slate-900 rounded-2xl overflow-hidden mb-6 shadow-2xl border border-white/10 hidden relative">
+                <img id="slide-img" src="" class="absolute inset-0 w-full h-full object-contain pointer-events-none">
             </div>
             <div class="bg-yellow-400 text-blue-900 px-5 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-md mb-4" id="slide-year">1910</div>
             <h2 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mb-4 leading-tight" id="slide-title">Event Title</h2>
@@ -376,6 +392,7 @@
 
         let currentEditId = null; let currentEditType = null;
         let isDragging = false; let startX, startY;
+        let tempTlImgX = 0; let tempTlImgY = 0;
         
         // Trivia State
         let activeTriviaCatId = null;
@@ -571,7 +588,16 @@
                 items.push({ type: 'tick', year: y });
             }
             timeline.forEach(t => items.push({ type: 'event', year: parseInt(t.year), data: t }));
-            items.sort((a, b) => a.year - b.year || (a.type === 'tick' ? -1 : 1));
+            
+            const getTime = (item) => {
+                if (item.type === 'tick') return new Date(item.year, 0, 0).getTime();
+                if (item.data && item.data.exactDate) {
+                    const parts = item.data.exactDate.split('-');
+                    return new Date(parts[0], parts[1]-1, parts[2]).getTime();
+                }
+                return new Date(item.year, 11, 31).getTime();
+            };
+            items.sort((a, b) => getTime(a) - getTime(b) || (a.type === 'tick' ? -1 : 1));
 
             let isLeft = true;
             const listWrapper = document.createElement('div');
@@ -592,7 +618,14 @@
 
                     let imgHtml = '';
                     if (ev.img) {
-                        imgHtml = `<div class="w-full h-48 bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden mb-3 border border-slate-100 dark:border-slate-700 shadow-inner"><img src="${ev.img}" class="w-full h-full object-cover"></div>`;
+                        imgHtml = `<div class="w-full h-48 bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden mb-3 border border-slate-100 dark:border-slate-700 shadow-inner relative"><img src="${ev.img}" class="absolute inset-0 w-full h-full object-contain pointer-events-none" style="transform: translate(${ev.imgX || 0}%, ${ev.imgY || 0}%) scale(${ev.imgZoom || 1});"></div>`;
+                    }
+                    
+                    let displayDate = ev.year;
+                    if (ev.exactDate) {
+                        const parts = ev.exactDate.split('-');
+                        const dObj = new Date(parts[0], parts[1]-1, parts[2]);
+                        displayDate = dObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
                     }
 
                     listWrapper.innerHTML += `
@@ -601,7 +634,7 @@
                             <div class="w-full max-w-lg bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-md border border-slate-100 dark:border-slate-700 relative hover:-translate-y-1 transition-transform text-left">
                                 ${adminControls}
                                 ${imgHtml}
-                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 block">${ev.year}</span>
+                                <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1 block">${displayDate}</span>
                                 <h4 class="text-base font-bold text-slate-800 dark:text-slate-100 leading-snug mb-2">${ev.title}</h4>
                                 ${ev.description ? `<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-wrap">${ev.description}</p>` : ''}
                             </div>
@@ -645,28 +678,53 @@
         };
 
         window.openTimelineEntryModal = function(id = null) {
+            currentEditType = 'timeline-event';
             currentEditId = id;
             const ev = id ? timeline.find(t => t.id === id) : null;
             document.getElementById('tl-year').value = ev ? ev.year : new Date().getFullYear();
+            document.getElementById('tl-exact-date').value = ev ? (ev.exactDate || '') : '';
             document.getElementById('tl-title').value = ev ? ev.title : '';
             document.getElementById('tl-image').value = ev ? (ev.img || '') : '';
             document.getElementById('tl-desc').value = ev ? ev.description : '';
+            tempTlImgX = ev ? (ev.imgX || 0) : 0;
+            tempTlImgY = ev ? (ev.imgY || 0) : 0;
+            document.getElementById('tl-zoom').value = ev ? (ev.imgZoom || 1) : 1;
+            
+            window.updateTimelinePreview();
             document.getElementById('timeline-entry-modal').classList.replace('hidden', 'flex');
             setTimeout(() => window.autoResizeTextarea(document.getElementById('tl-desc')), 10);
         };
         window.closeTimelineEntryModal = () => document.getElementById('timeline-entry-modal').classList.replace('flex', 'hidden');
+        
+        window.updateTimelinePreview = function() {
+            const url = document.getElementById('tl-image').value;
+            const imgEl = document.getElementById('tl-preview-img');
+            const z = parseFloat(document.getElementById('tl-zoom').value) || 1;
+            
+            if (url) {
+                imgEl.src = url;
+                imgEl.style.display = 'block';
+                imgEl.style.transform = `translate(${tempTlImgX}%, ${tempTlImgY}%) scale(${z})`;
+            } else {
+                imgEl.style.display = 'none';
+            }
+            document.getElementById('tl-zoom-val').innerText = z.toFixed(2) + 'x';
+        };
+
         window.saveTimelineEntry = function() {
             const year = parseInt(document.getElementById('tl-year').value);
+            const exactDate = document.getElementById('tl-exact-date').value;
             const title = document.getElementById('tl-title').value.trim();
             const img = document.getElementById('tl-image').value.trim();
             const desc = document.getElementById('tl-desc').value.trim();
+            const imgZoom = parseFloat(document.getElementById('tl-zoom').value) || 1;
             if (!title || isNaN(year)) return window.showToast('Year and Title required', true);
             
             if (currentEditId) {
                 const ev = timeline.find(t => t.id === currentEditId);
-                if (ev) { ev.year = year; ev.title = title; ev.img = img; ev.description = desc; }
+                if (ev) { ev.year = year; ev.exactDate = exactDate; ev.title = title; ev.img = img; ev.description = desc; ev.imgX = tempTlImgX; ev.imgY = tempTlImgY; ev.imgZoom = imgZoom; }
             } else {
-                timeline.push({ id: 'tl_' + Date.now(), year, title, img, description: desc });
+                timeline.push({ id: 'tl_' + Date.now(), year, exactDate, title, img, description: desc, imgX: tempTlImgX, imgY: tempTlImgY, imgZoom: imgZoom });
             }
             window.closeTimelineEntryModal(); window.render(); if (useFirebase) window.syncToCloud();
         };
@@ -679,7 +737,11 @@
 
         /* --- Slideshow Functions --- */
         window.openTimelineSlideshow = function() {
-            sortedTimelineEvents = [...timeline].sort((a, b) => a.year - b.year);
+            sortedTimelineEvents = [...timeline].sort((a, b) => {
+                const timeA = a.exactDate ? new Date(a.exactDate.split('-')[0], a.exactDate.split('-')[1]-1, a.exactDate.split('-')[2]).getTime() : new Date(a.year, 11, 31).getTime();
+                const timeB = b.exactDate ? new Date(b.exactDate.split('-')[0], b.exactDate.split('-')[1]-1, b.exactDate.split('-')[2]).getTime() : new Date(b.year, 11, 31).getTime();
+                return timeA - timeB;
+            });
             if (sortedTimelineEvents.length === 0) return;
             slideshowActiveIndex = 0;
             window.updateSlideshowContent();
@@ -703,7 +765,14 @@
             const ev = sortedTimelineEvents[slideshowActiveIndex];
             if (!ev) return;
 
-            document.getElementById('slide-year').innerText = ev.year;
+            let displayDate = ev.year;
+            if (ev.exactDate) {
+                const parts = ev.exactDate.split('-');
+                const dObj = new Date(parts[0], parts[1]-1, parts[2]);
+                displayDate = dObj.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
+            document.getElementById('slide-year').innerText = displayDate;
             document.getElementById('slide-title').innerText = ev.title;
             document.getElementById('slide-desc').innerText = ev.description || '';
             document.getElementById('slide-counter').innerText = `${slideshowActiveIndex + 1} of ${sortedTimelineEvents.length}`;
@@ -712,6 +781,7 @@
             const imgEl = document.getElementById('slide-img');
             if (ev.img) {
                 imgEl.src = ev.img;
+                imgEl.style.transform = `translate(${ev.imgX || 0}%, ${ev.imgY || 0}%) scale(${ev.imgZoom || 1})`;
                 imgContainer.classList.remove('hidden');
             } else {
                 imgContainer.classList.add('hidden');
@@ -1180,14 +1250,54 @@
 
         window.onload = () => window.render();
         document.getElementById('input-image').addEventListener('input', window.updatePreview); document.getElementById('input-zoom').addEventListener('input', window.updatePreview);
-        document.getElementById('preview-box').addEventListener('mousedown', (e) => { if (currentEditType === 'category') return; isDragging = true; startX = e.clientX; startY = e.clientY; });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return; const dx = e.clientX - startX; const dy = e.clientY - startY; startX = e.clientX; startY = e.clientY;
-            const r = document.getElementById('preview-box').getBoundingClientRect(); if (r.width === 0 || r.height === 0) return;
-            let obj = currentEditType === 'header' || currentEditType === 'app-icon' || currentEditType === 'header-design' ? settings : links.find(l => l.id === currentEditId);
-            if (obj) { if (currentEditType === 'app-icon') { obj.tabIconX = (obj.tabIconX||0)+((dx/r.width)*100); obj.tabIconY = (obj.tabIconY||0)+((dy/r.height)*100); } else if (currentEditType === 'header-design') { obj.headerBgX = (obj.headerBgX||0)+((dx/r.width)*100); obj.headerBgY = (obj.headerBgY||0)+((dy/r.height)*100); } else { obj.x = (obj.x||0)+((dx/r.width)*100); obj.y = (obj.y||0)+((dy/r.height)*100); } window.updatePreview(); }
-        });
-        window.addEventListener('mouseup', () => isDragging = false);
+        
+        const startDrag = (e, type) => {
+            if (type === 'category') return;
+            isDragging = true;
+            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            if(type === 'timeline-event') currentEditType = type;
+        };
+
+        const handleDrag = (e) => {
+            if (!isDragging) return;
+            if(e.type === 'touchmove' && e.cancelable) e.preventDefault();
+            
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            const dx = clientX - startX; const dy = clientY - startY; 
+            startX = clientX; startY = clientY;
+
+            if (currentEditType === 'timeline-event') {
+                const r = document.getElementById('tl-preview-box').getBoundingClientRect();
+                if (r.width === 0 || r.height === 0) return;
+                tempTlImgX += (dx/r.width)*100; tempTlImgY += (dy/r.height)*100;
+                window.updateTimelinePreview();
+            } else {
+                const r = document.getElementById('preview-box').getBoundingClientRect(); 
+                if (r.width === 0 || r.height === 0) return;
+                let obj = currentEditType === 'header' || currentEditType === 'app-icon' || currentEditType === 'header-design' ? settings : links.find(l => l.id === currentEditId);
+                if (obj) { 
+                    if (currentEditType === 'app-icon') { obj.tabIconX = (obj.tabIconX||0)+((dx/r.width)*100); obj.tabIconY = (obj.tabIconY||0)+((dy/r.height)*100); } 
+                    else if (currentEditType === 'header-design') { obj.headerBgX = (obj.headerBgX||0)+((dx/r.width)*100); obj.headerBgY = (obj.headerBgY||0)+((dy/r.height)*100); } 
+                    else { obj.x = (obj.x||0)+((dx/r.width)*100); obj.y = (obj.y||0)+((dy/r.height)*100); } 
+                    window.updatePreview(); 
+                }
+            }
+        };
+
+        const endDrag = () => isDragging = false;
+
+        document.getElementById('preview-box').addEventListener('mousedown', (e) => startDrag(e, currentEditType));
+        document.getElementById('preview-box').addEventListener('touchstart', (e) => startDrag(e, currentEditType), {passive: false});
+
+        document.getElementById('tl-preview-box').addEventListener('mousedown', (e) => startDrag(e, 'timeline-event'));
+        document.getElementById('tl-preview-box').addEventListener('touchstart', (e) => startDrag(e, 'timeline-event'), {passive: false});
+
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('touchmove', handleDrag, {passive: false});
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
     </script>
 </body>
 </html>
