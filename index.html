@@ -305,13 +305,17 @@
                 <button onclick="window.closeTimelineConfigModal()" class="p-2 hover:bg-white/10 rounded-full transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
             </div>
             <div class="p-5 sm:p-6 md:p-8 space-y-4">
-                <div class="col-span-2">
+                <div>
                     <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Timeline Page Title</label>
                     <input id="tl-page-title" type="text" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Start Year</label><input id="tl-start-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
                     <div><label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">End Year</label><input id="tl-end-year" type="number" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white"></div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Auto-Play Interval (Seconds)</label>
+                    <input id="tl-slideshow-interval" type="number" min="1" class="w-full p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl font-bold text-sm outline-none dark:text-white">
                 </div>
                 <div class="flex justify-end mt-4"><button onclick="window.saveTimelineConfig()" class="w-full px-8 py-3.5 bg-blue-600 text-white rounded-xl font-black uppercase tracking-widest shadow-xl text-sm hover:bg-blue-700 transition-colors">Save Settings</button></div>
             </div>
@@ -365,7 +369,7 @@
             <h2 class="text-2xl sm:text-4xl font-black text-white uppercase tracking-tight mb-4 leading-tight" id="slide-title">Event Title</h2>
             <p class="text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed whitespace-pre-wrap" id="slide-desc">Event description goes here...</p>
             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-8" id="slide-counter">1 of 10</span>
-            <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-2 animate-pulse">Tap anywhere to continue</span>
+            <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-2 animate-pulse">Tap anywhere to skip</span>
         </div>
     </div>
 
@@ -396,7 +400,7 @@
         let trivia = JSON.parse(localStorage.getItem('scout_trivia')) || [];
         
         // Timeline Data
-        let timelineConfig = JSON.parse(localStorage.getItem('scout_timeline_config')) || { startYear: 1910, endYear: new Date().getFullYear() + 10, pageTitle: 'Pack Timeline' };
+        let timelineConfig = JSON.parse(localStorage.getItem('scout_timeline_config')) || { startYear: 1910, endYear: new Date().getFullYear() + 10, pageTitle: 'Pack Timeline', slideshowInterval: 5 };
         let timeline = JSON.parse(localStorage.getItem('scout_timeline')) || [];
 
         let currentEditId = null; let currentEditType = null;
@@ -411,6 +415,7 @@
         // Slideshow State
         let slideshowActiveIndex = 0;
         let sortedTimelineEvents = [];
+        let slideshowTimer = null;
 
         window.showToast = function(msg, isErr = false) {
             const container = document.getElementById('toast-container'); const toast = document.createElement('div');
@@ -446,7 +451,7 @@
                                 if (data.volunteers) volunteers = data.volunteers;
                                 if (data.trivia) trivia = data.trivia;
                                 if (data.timeline) timeline = data.timeline;
-                                if (data.timelineConfig) timelineConfig = { ...{ startYear: 1910, endYear: new Date().getFullYear() + 10, pageTitle: 'Pack Timeline' }, ...data.timelineConfig };
+                                if (data.timelineConfig) timelineConfig = { ...{ startYear: 1910, endYear: new Date().getFullYear() + 10, pageTitle: 'Pack Timeline', slideshowInterval: 5 }, ...data.timelineConfig };
                                 window.render();
                             } else { window.syncToCloud(); }
                         }, (error) => {
@@ -671,6 +676,7 @@
             document.getElementById('tl-page-title').value = timelineConfig.pageTitle || 'Pack Timeline';
             document.getElementById('tl-start-year').value = timelineConfig.startYear;
             document.getElementById('tl-end-year').value = timelineConfig.endYear;
+            document.getElementById('tl-slideshow-interval').value = timelineConfig.slideshowInterval || 5;
             document.getElementById('timeline-config-modal').classList.replace('hidden', 'flex');
         };
         window.closeTimelineConfigModal = () => document.getElementById('timeline-config-modal').classList.replace('flex', 'hidden');
@@ -678,15 +684,18 @@
             const pageTitle = document.getElementById('tl-page-title').value.trim() || 'Pack Timeline';
             const sy = parseInt(document.getElementById('tl-start-year').value);
             const ey = parseInt(document.getElementById('tl-end-year').value);
-            if (!isNaN(sy) && !isNaN(ey) && sy <= ey) {
+            const interval = parseInt(document.getElementById('tl-slideshow-interval').value) || 5;
+            
+            if (!isNaN(sy) && !isNaN(ey) && sy <= ey && interval > 0) {
                 timelineConfig.pageTitle = pageTitle;
                 timelineConfig.startYear = sy;
                 timelineConfig.endYear = ey;
+                timelineConfig.slideshowInterval = interval;
                 window.closeTimelineConfigModal();
                 window.render();
                 if (useFirebase) window.syncToCloud();
             } else {
-                window.showToast('Invalid years provided', true);
+                window.showToast('Invalid settings provided', true);
             }
         };
 
@@ -763,10 +772,12 @@
             slideshowActiveIndex = 0;
             window.updateSlideshowContent();
             document.getElementById('timeline-slideshow-modal').classList.replace('hidden', 'flex');
+            window.startSlideshowTimer();
         };
 
         window.closeTimelineSlideshow = function(event) {
             if (event) event.stopPropagation();
+            window.stopSlideshowTimer();
             document.getElementById('timeline-slideshow-modal').classList.replace('flex', 'hidden');
         };
 
@@ -776,6 +787,22 @@
                 slideshowActiveIndex = 0; // Wrap around to the start
             }
             window.updateSlideshowContent();
+            window.startSlideshowTimer();
+        };
+
+        window.startSlideshowTimer = function() {
+            window.stopSlideshowTimer();
+            const interval = (timelineConfig.slideshowInterval || 5) * 1000;
+            slideshowTimer = setInterval(() => {
+                window.advanceSlideshow();
+            }, interval);
+        };
+
+        window.stopSlideshowTimer = function() {
+            if (slideshowTimer) {
+                clearInterval(slideshowTimer);
+                slideshowTimer = null;
+            }
         };
 
         window.updateSlideshowContent = function() {
